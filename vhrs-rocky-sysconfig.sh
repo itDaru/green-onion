@@ -1,23 +1,47 @@
 #!/bin/bash
+set -e
 
-# --- Inicio de la verificación de Multiplexor ---
-# Comprueba si el script ya se está ejecutando dentro de tmux o screen
-if [ -z "$TMUX" ] && [ -z "$STY" ]; then
-    echo "Detectado que el script no se ejecuta en una sesión de multiplexor (tmux/screen)."
-    echo "Relanzando el script dentro de una sesión de tmux llamada 'rocky_prep'."
-    echo "Si la conexión SSH se pierde, reconéctese y use 'tmux attach -t rocky_prep' para continuar."
-    echo ""
-    # Ejecuta el script actual dentro de una nueva sesión de tmux
-    # El 'exec' reemplaza el proceso actual del script con el comando tmux
-    exec tmux new-session -s rocky_prep "$0" "$@"
-    # Si tmux falla (por ejemplo, no está instalado), el script continuará aquí.
-    # Puedes añadir un mensaje de error o salir si prefieres que sea un requisito.
-    if [ $? -ne 0 ]; then
-        echo "Error: Falló al iniciar la sesión de tmux. Asegúrese de que tmux esté instalado."
-        # Opcional: exit 1
+# --- Manejo de argumentos ---
+SKIP_TMUX=false
+for arg in "$@"; do
+  if [ "$arg" == "--no-tmux" ]; then
+    SKIP_TMUX=true
+    break # Encontramos el flag, no necesitamos seguir buscando
+  fi
+done
+# --- Fin del manejo de argumentos ---
+
+# --- Inicio de la verificación e instalación de Multiplexor (Condicional) ---
+if [ "$SKIP_TMUX" = false ]; then
+    # Instalar tmux si no está instalado
+    if ! dnf list installed tmux &> /dev/null; then
+        echo "tmux no encontrado. Instalando tmux..."
+        dnf install -y tmux
+        # set -e will handle the exit if dnf fails
+        echo "tmux instalado exitosamente."
     fi
+
+
+    # Comprueba si el script ya se está ejecutando dentro de tmux o screen
+    if [ -z "$TMUX" ] && [ -z "$STY" ]; then
+        echo "Detectado que el script no se ejecuta en una sesión de multiplexor (tmux/screen)."
+        echo "Relanzando el script dentro de una sesión de tmux llamada 'rocky_prep'."
+        echo "Si la conexión SSH se pierde, reconéctese y use 'tmux attach -t rocky_prep' para continuar."
+        echo ""
+        # Execute the script inside a new tmux session, replacing the current process.
+        # set -e will cause the script to exit if tmux new-session fails.
+        exec tmux new-session -s rocky_prep "$0" "$@"
+        # This line should theoretically never be reached if exec is successful.
+        # If exec fails, set -e should have already exited the script.
+        # Adding a fallback exit just in case, though it's redundant with set -e.
+        echo "Error: Unexpected execution path after exec tmux new-session."
+        exit 1 # Should not be reached
+    fi
+    # --- Fin de la verificación de Multiplexor ---
+else
+    echo "Modo sin tmux (--no-tmux) activado. Omitiendo instalación y verificación de multiplexor."
 fi
-# --- Fin de la verificación de Multiplexor ---
+# --- Fin de la sección condicional de Multiplexor ---
 
 
 echo "Script de Preparación de Sistema Rocky Linux para Repositorios Inmutables"
@@ -47,7 +71,7 @@ echo ""
 
 # Configuración de Hostname
 echo ""
-read -p "¿Cambiar el nombre del servidor (hostname)? (Y/n): " change_hostname_confirm
+read -p "¿Cambiar el nombre del servidor (hostname)? (y/N): " change_hostname_confirm
 if [[ "$change_hostname_confirm" =~ ^[Yy]$ ]]; then
     echo "Configurando hostname..."
     read -p "Introduce el nuevo hostname: " new_hostname
@@ -102,7 +126,7 @@ nmcli connection up "$interface"
 echo "Configuración de red aplicada."
 
 echo ""
-read -p "¿Realizar test de red (ping y nslookup)? (Y/n): " test_confirm
+read -p "¿Realizar test de red (ping y nslookup)? (y/N): " test_confirm
 if [[ "$test_confirm" =~ ^[Yy]$ ]]; then
     echo "Realizando tests de red..."
 
@@ -161,7 +185,7 @@ fi
 
 # Configuración de SSH
 echo ""
-read -p "¿Configurar e instalar SSH? (Y/n): " ssh_confirm
+read -p "¿Configurar e instalar SSH? (y/N): " ssh_confirm
 if [[ "$ssh_confirm" =~ ^[Yy]$ ]]; then
     echo "Configurando SSH..."
 
@@ -240,7 +264,7 @@ fi
 
 # Creación de Usuario de Servicio
 echo ""
-read -p "¿Crear usuario de servicio? (Y/n): " create_user_confirm
+read -p "¿Crear usuario de servicio? (y/N): " create_user_confirm
 if [[ "$create_user_confirm" =~ ^[Yy]$ ]]; then
     echo "Configurando usuario de servicio..."
 
@@ -280,7 +304,7 @@ if [[ "$create_user_confirm" =~ ^[Yy]$ ]]; then
     default_ssh_key="" # <-- PUT YOUR DEFAULT KEY HERE
 
     # Configurar llave SSH pública
-    read -p "¿Configurar llave SSH pública para '$service_username'? (Y/n): " config_ssh_key_confirm
+    read -p "¿Configurar llave SSH pública para '$service_username'? (y/N): " config_ssh_key_confirm
     if [[ "$config_ssh_key_confirm" =~ ^[Yy]$ ]]; then
         echo "Por favor, pegue la llave SSH pública (doble enter para terminar):"
         ssh_key_input=""
@@ -354,13 +378,13 @@ fi
 
 # Configuración de Almacenamiento Remoto (NFS, iSCSI, SMB)
 echo ""
-read -p "¿Configurar Almacenamiento Remoto (NFS, iSCSI, SMB)? (Y/n): " storage_confirm
+read -p "¿Configurar Almacenamiento Remoto (NFS, iSCSI, SMB)? (y/N): " storage_confirm
 if [[ "$storage_confirm" =~ ^[Yy]$ ]]; then
     echo "Configuración de Almacenamiento Remoto - NOTA IMPORTANTE:"
     echo "Esta parte del script aún no está automatizada."
     echo "Deberá realizar la configuración manualmente."
     echo ""
-    read -p "¿Desea abrir una shell para configurar manualmente? (Y/n): " open_shell_confirm
+    read -p "¿Desea abrir una shell para configurar manualmente? (y/N): " open_shell_confirm
     if [[ "$open_shell_confirm" =~ ^[Yy]$ ]]; then
         echo "Abriendo una nueva shell. Por favor, configure el almacenamiento remoto manualmente."
         echo "Escriba 'exit' para volver al script (si es posible) o terminar."
@@ -378,7 +402,7 @@ fi
 
 # Configuración de Discos y LVM
 echo ""
-read -p "¿Configurar Discos y LVM? (Y/n): " disk_config_confirm
+read -p "¿Configurar Discos y LVM? (y/N): " disk_config_confirm
 if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
     echo "Configurando Discos..."
 
@@ -388,7 +412,7 @@ if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
     echo ""
 
     # Preguntar si usar LVM
-    read -p "¿Implementar LVM? (Y/n): " use_lvm_confirm
+    read -p "¿Implementar LVM? (y/N): " use_lvm_confirm
 
     if [[ "$use_lvm_confirm" =~ ^[Yy]$ ]]; then
         echo "Configurando LVM..."
@@ -578,3 +602,17 @@ fi
 
 echo ""
 echo "Script de Preparación de Sistema Finalizado."
+echo "Limpiando sistema (desinstalando tmux)..."
+dnf remove -y tmux
+if [ $? -ne 0 ]; then
+    echo "Advertencia: Falló la desinstalación de tmux."
+else
+    echo "tmux desinstalado exitosamente."
+fi
+# --- Fin de la Limpieza ---
+
+echo "Proceso de preparación completado."
+echo "Por favor, ingresa a la consola de Veeam Backup & Replication y configura el repositorio inmutable."
+echo "Gracias por usar este script. ¡Hasta luego!"
+exit 0
+
