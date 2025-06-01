@@ -26,7 +26,10 @@ if [ "$SKIP_TMUX" = false ]; then
     if [ -z "$TMUX" ] && [ -z "$STY" ]; then
         echo "Detectado que el script no se ejecuta en una sesión de multiplexor (tmux/screen)."
         echo "Relanzando el script dentro de una sesión de tmux llamada 'rocky_prep'."
-        echo "Si la conexión SSH se pierde, reconéctese y use 'tmux attach -t rocky_prep' para continuar."
+        echo "Si la conexión SSH se pierde, reconéctese y use el siguiente comando para continuar."
+        echo "    tmux attach"
+        echo "o"
+        echo "    tmux attach -t rocky_prep"
         echo ""
         # Execute the script inside a new tmux session, replacing the current process.
         # set -e will cause the script to exit if tmux new-session fails.
@@ -52,7 +55,7 @@ echo ""
 echo "1. Configuración de una dirección IP estática."
 echo "2. Instalación y configuración del servicio SSH."
 echo "3. Creación de un usuario de servicio específico (veeamsvc)."
-echo "4. Conexión a sistemas de almacenamiento remoto (NFS, iSCSI, SMB)."
+echo "4. [PENDIENTE] Conexión a sistemas de almacenamiento remoto (NFS, iSCSI, SMB)."
 echo "5. Montaje de discos utilizando LVM (Logical Volume Management)."
 echo ""
 echo "Este script está diseñado para ser ejecutado con privilegios de superusuario (root)."
@@ -615,4 +618,3 @@ echo "Proceso de preparación completado."
 echo "Por favor, ingresa a la consola de Veeam Backup & Replication y configura el repositorio inmutable."
 echo "Gracias por usar este script. ¡Hasta luego!"
 exit 0
-
