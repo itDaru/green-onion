@@ -1,28 +1,26 @@
 #!/bin/bash
-set -e
-
-# --- Manejo de argumentos ---
+set -e #crash on error
 SKIP_TMUX=false
+
+
+# detect --no-tmux flag
 for arg in "$@"; do
   if [ "$arg" == "--no-tmux" ]; then
     SKIP_TMUX=true
-    break # Encontramos el flag, no necesitamos seguir buscando
+    break
   fi
 done
-# --- Fin del manejo de argumentos ---
 
-# --- Inicio de la verificación e instalación de Multiplexor (Condicional) ---
+# --- Multiplexor Check Start ---
+# check multiplexor and install it if not present
 if [ "$SKIP_TMUX" = false ]; then
-    # Instalar tmux si no está instalado
     if ! dnf list installed tmux &> /dev/null; then
         echo "tmux no encontrado. Instalando tmux..."
         dnf install -y tmux
-        # set -e will handle the exit if dnf fails
         echo "tmux instalado exitosamente."
     fi
 
-
-    # Comprueba si el script ya se está ejecutando dentro de tmux o screen
+# check if running inside a multiplexor session
     if [ -z "$TMUX" ] && [ -z "$STY" ]; then
         echo "Detectado que el script no se ejecuta en una sesión de multiplexor (tmux/screen)."
         echo "Relanzando el script dentro de una sesión de tmux llamada 'rocky_prep'."
@@ -31,22 +29,16 @@ if [ "$SKIP_TMUX" = false ]; then
         echo "o"
         echo "    tmux attach -t rocky_prep"
         echo ""
-        # Execute the script inside a new tmux session, replacing the current process.
-        # set -e will cause the script to exit if tmux new-session fails.
-        exec tmux new-session -s rocky_prep "$0" "$@"
-        # This line should theoretically never be reached if exec is successful.
-        # If exec fails, set -e should have already exited the script.
-        # Adding a fallback exit just in case, though it's redundant with set -e.
+        exec tmux new-session -s rocky_prep "$0" "$@" # launch new tmux session
         echo "Error: Unexpected execution path after exec tmux new-session."
-        exit 1 # Should not be reached
+        exit 1 # exit if exec fails
     fi
-    # --- Fin de la verificación de Multiplexor ---
 else
     echo "Modo sin tmux (--no-tmux) activado. Omitiendo instalación y verificación de multiplexor."
 fi
-# --- Fin de la sección condicional de Multiplexor ---
+# --- Multiplexor Check End ---
 
-
+# --- Script Start ---
 echo "Script de Preparación de Sistema Rocky Linux para Repositorios Inmutables"
 echo ""
 echo "Este script automatiza la configuración inicial de un sistema Rocky Linux"
@@ -61,8 +53,7 @@ echo ""
 echo "Este script está diseñado para ser ejecutado con privilegios de superusuario (root)."
 echo "Se recomienda revisar y adaptar las variables y configuraciones según el entorno específico."
 
-
-# Init
+# Ask before proceeding
 read -p "Continuar? (Y/n): " confirm
 if [[ "$confirm" =~ ^[Nn]$ ]]; then
     echo "Operación cancelada por el usuario."
@@ -72,7 +63,7 @@ echo ""
 echo "Iniciando la configuración..."
 echo ""
 
-# Configuración de Hostname
+# Hostname Configuration
 echo ""
 read -p "¿Cambiar el nombre del servidor (hostname)? (y/N): " change_hostname_confirm
 if [[ "$change_hostname_confirm" =~ ^[Yy]$ ]]; then
@@ -96,7 +87,7 @@ else
 fi
 
 
-# Configuración de IP estática
+# Static IP Configuration
 echo "Configurando dirección IP estática..."
 ip link show | awk -F': ' '$0 !~ "lo:" {print $2}'
 read -p "Introduce el nombre de la interfaz de red a configurar (ej: eth0, ens192): " interface
@@ -112,11 +103,8 @@ for octet in "${octets[@]}"; do
     mask_binary+=$(printf "%08d" $(echo "obase=2; $octet" | bc))
 done
 prefix_length=$(echo "$mask_binary" | grep -o '1' | wc -l)
-
-# Replace commas with spaces in DNS servers string
 dns_servers_spaced=$(echo "$dns_servers" | sed 's/,/ /g')
 
-# Configure the interface using nmcli
 echo "Aplicando configuración..."
 nmcli connection modify "$interface" \
     ipv4.method manual \
@@ -127,56 +115,58 @@ nmcli connection modify "$interface" \
 nmcli connection up "$interface"
 
 echo "Configuración de red aplicada."
-
 echo ""
+
+# Connectivity Tests
 read -p "¿Realizar test de red (ping y nslookup)? (y/N): " test_confirm
 if [[ "$test_confirm" =~ ^[Yy]$ ]]; then
     echo "Realizando tests de red..."
 
-    # Test de ping con reintento/salida
+# Ping Test
     while true; do
         read -p "Introduce la IP para el test de ping (por defecto: 1.1.1.1): " ping_target
         ping_target=${ping_target:-1.1.1.1}
         echo "Realizando ping a $ping_target..."
         if ping -c 4 "$ping_target"; then
             echo "Ping a $ping_target exitoso."
-            break # Salir del bucle de ping si es exitoso
+            break
         else
             echo "Ping a $ping_target fallido."
             read -p "¿Qué desea hacer? (r: Reintentar, e: Salir del script): " action
             if [[ "$action" =~ ^[Ee]$ ]]; then
                 echo "Saliendo del script por fallo en ping."
-                exit 1 # Salir del script
+                exit 1
             elif [[ "$action" =~ ^[Rr]$ ]]; then
                 echo "Reintentando ping..."
-                continue # Continuar el bucle
+                continue
             else
                 echo "Opción no válida. Reintentando ping por defecto."
-                continue # Por defecto, reintentar
+                continue
             fi
         fi
     done
 
-    # Test de nslookup con reintento/salida
+# Nslookup Test
     while true; do
         read -p "Introduce el dominio para el test de nslookup (por defecto: rockylinux.org): " nslookup_target
         nslookup_target=${nslookup_target:-rockylinux.org}
         echo "Realizando nslookup para $nslookup_target..."
         if nslookup "$nslookup_target"; then
             echo "Nslookup para $nslookup_target exitoso."
-            break # Salir del bucle de nslookup si es exitoso
+            sleep 2
+            break
         else
             echo "Nslookup para $nslookup_target fallido."
             read -p "¿Qué desea hacer? (r: Reintentar, e: Salir del script): " action
             if [[ "$action" =~ ^[Ee]$ ]]; then
                 echo "Saliendo del script por fallo en nslookup."
-                exit 1 # Salir del script
+                exit 1
             elif [[ "$action" =~ ^[Rr]$ ]]; then
                 echo "Reintentando nslookup..."
-                continue # Continuar el bucle
+                continue
             else
                 echo "Opción no válida. Reintentando nslookup por defecto."
-                continue # Por defecto, reintentar
+                continue
             fi
         fi
     done
@@ -186,13 +176,13 @@ else
     echo "Tests de red omitidos."
 fi
 
-# Configuración de SSH
+# SSH Configuration
 echo ""
 read -p "¿Configurar e instalar SSH? (y/N): " ssh_confirm
 if [[ "$ssh_confirm" =~ ^[Yy]$ ]]; then
     echo "Configurando SSH..."
 
-    # Instalar OpenSSH Server si no está instalado
+    # Install openssh-server if not installed
     if ! dnf list installed openssh-server &> /dev/null; then
         echo "Instalando openssh-server..."
         dnf install -y openssh-server
@@ -204,7 +194,7 @@ if [[ "$ssh_confirm" =~ ^[Yy]$ ]]; then
         echo "openssh-server ya está instalado."
     fi
 
-    # Hardenizar configuración SSH
+    # SSH Configuration
     SSH_CONFIG="/etc/ssh/sshd_config"
     SSH_CONFIG_BACKUP="${SSH_CONFIG}.bak.$(date +%Y%m%d_%H%M%S)"
 
@@ -213,16 +203,15 @@ if [[ "$ssh_confirm" =~ ^[Yy]$ ]]; then
 
     echo "Aplicando configuraciones de seguridad a $SSH_CONFIG..."
 
-    # Deshabilitar login de root por SSH
+    # Disable root login
     sed -i 's/^PermitRootLogin.*/PermitRootLogin no/' "$SSH_CONFIG"
     if ! grep -q "^PermitRootLogin no" "$SSH_CONFIG"; then
         echo "PermitRootLogin no" >> "$SSH_CONFIG"
     fi
 
-    # Asegurar que PasswordAuthentication está habilitado (necesario para veeamsvc)
+    # Make sure PasswordAuthentication is enabled
     sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' "$SSH_CONFIG"
     if ! grep -q "^PasswordAuthentication yes" "$SSH_CONFIG"; then
-         # Add it if not present or commented out
          if grep -q "^#PasswordAuthentication yes" "$SSH_CONFIG"; then
              sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication yes/' "$SSH_CONFIG"
          else
@@ -230,31 +219,31 @@ if [[ "$ssh_confirm" =~ ^[Yy]$ ]]; then
          fi
     fi
 
-    # Deshabilitar autenticación basada en host
+    # Disable Hostbased Authentication
     sed -i 's/^HostbasedAuthentication.*/HostbasedAuthentication no/' "$SSH_CONFIG"
     if ! grep -q "^HostbasedAuthentication no" "$SSH_CONFIG"; then
         echo "HostbasedAuthentication no" >> "$SSH_CONFIG"
     fi
 
-    # Deshabilitar autenticación Rhosts
+    # Disable Rhost Authentication
     sed -i 's/^IgnoreRhosts.*/IgnoreRhosts yes/' "$SSH_CONFIG"
      if ! grep -q "^IgnoreRhosts yes" "$SSH_CONFIG"; then
         echo "IgnoreRhosts yes" >> "$SSH_CONFIG"
     fi
 
-    # Deshabilitar autenticación GSSAPI (opcional, puede ser necesario en algunos entornos)
+    # Disable GSSAPI Authentication (if not needed)
     # sed -i 's/^GSSAPIAuthentication.*/GSSAPIAuthentication no/' "$SSH_CONFIG"
     # if ! grep -q "^GSSAPIAuthentication no" "$SSH_CONFIG"; then
     #     echo "GSSAPIAuthentication no" >> "$SSH_CONFIG"
     # fi
 
-    # Deshabilitar X11 Forwarding (si no es necesario)
+    # Disable X11 Forwarding
     sed -i 's/^X11Forwarding.*/X11Forwarding no/' "$SSH_CONFIG"
     if ! grep -q "^X11Forwarding no" "$SSH_CONFIG"; then
         echo "X11Forwarding no" >> "$SSH_CONFIG"
     fi
 
-    # Reiniciar el servicio SSH para aplicar los cambios
+    # Restart SSH service 
     echo "Reiniciando el servicio SSH..."
     systemctl enable --now sshd
     systemctl restart sshd
@@ -265,7 +254,7 @@ else
 fi
 
 
-# Creación de Usuario de Servicio
+# Service User Configuration
 echo ""
 read -p "¿Crear usuario de servicio? (y/N): " create_user_confirm
 if [[ "$create_user_confirm" =~ ^[Yy]$ ]]; then
@@ -274,7 +263,6 @@ if [[ "$create_user_confirm" =~ ^[Yy]$ ]]; then
     read -p "Introduce el nombre del usuario de servicio (por defecto: veeamsvc): " service_username
     service_username=${service_username:-veeamsvc}
 
-    # Verificar si el usuario ya existe
     if id "$service_username" &>/dev/null; then
         echo "El usuario '$service_username' ya existe. Omitiendo creación."
     else
@@ -285,13 +273,12 @@ if [[ "$create_user_confirm" =~ ^[Yy]$ ]]; then
             exit 1
         fi
 
-        # Generar y configurar contraseña aleatoria
+        # Random Password Generation
         echo "Generando contraseña para '$service_username'..."
         generated_password=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 12)
         echo "$generated_password" | passwd --stdin "$service_username"
         if [ $? -ne 0 ]; then
             echo "Error: Falló la configuración de la contraseña para '$service_username'."
-            # Considerar si salir o continuar
         else
             echo "Contraseña generada para '$service_username': "
             echo ""
@@ -302,11 +289,9 @@ if [[ "$create_user_confirm" =~ ^[Yy]$ ]]; then
     fi
 
     # Define the default SSH public key here.
-    # Replace this placeholder with your actual default key string.
-    # Example: default_ssh_key="ssh-rsa AAAAB3Nz... user@host"
-    default_ssh_key="" # <-- PUT YOUR DEFAULT KEY HERE
+    default_ssh_key=""
 
-    # Configurar llave SSH pública
+    # Public SSH Key Configuration
     read -p "¿Configurar llave SSH pública para '$service_username'? (y/N): " config_ssh_key_confirm
     if [[ "$config_ssh_key_confirm" =~ ^[Yy]$ ]]; then
         echo "Por favor, pegue la llave SSH pública (doble enter para terminar):"
@@ -331,14 +316,14 @@ if [[ "$create_user_confirm" =~ ^[Yy]$ ]]; then
 
             echo "Configurando llave SSH para '$service_username' en $authorized_keys_file..."
 
-            # Crear directorio .ssh si no existe y establecer permisos
+            # Create .ssh directory if it doesn't exist and set permissions
             if [ ! -d "$ssh_dir" ]; then
                 mkdir "$ssh_dir"
                 chmod 700 "$ssh_dir"
                 chown "$service_username":"$service_username" "$ssh_dir"
             fi
 
-            # Agregar la llave al archivo authorized_keys
+            # Add the SSH key to authorized_keys
             echo "$ssh_key_to_use" | tee -a "$authorized_keys_file" > /dev/null
             chmod 600 "$authorized_keys_file"
             chown "$service_username":"$service_username" "$authorized_keys_file"
@@ -351,9 +336,9 @@ if [[ "$create_user_confirm" =~ ^[Yy]$ ]]; then
         echo "Configuración de llave SSH omitida."
     fi
 
-    # Agregar usuario al grupo sudo o wheel
+    # Add user to sudoers group
     echo "Agregando usuario '$service_username' al grupo de sudoers..."
-    # Check if 'wheel' group exists (common in RHEL/Rocky)
+    # Check if 'wheel' group exists
     if getent group wheel > /dev/null; then
         usermod -aG wheel "$service_username"
         if [ $? -ne 0 ]; then
@@ -361,7 +346,7 @@ if [[ "$create_user_confirm" =~ ^[Yy]$ ]]; then
         else
             echo "'$service_username' agregado al grupo 'wheel'."
         fi
-    # Check if 'sudo' group exists (common in Debian/Ubuntu)
+    # Check if 'sudo' group exists
     elif getent group sudo > /dev/null; then
          usermod -aG sudo "$service_username"
          if [ $? -ne 0 ]; then
@@ -379,7 +364,7 @@ else
     echo "Creación de usuario de servicio omitida."
 fi
 
-# Configuración de Almacenamiento Remoto (NFS, iSCSI, SMB)
+# [PENDING] Remote Storage Configuration
 echo ""
 read -p "¿Configurar Almacenamiento Remoto (NFS, iSCSI, SMB)? (y/N): " storage_confirm
 if [[ "$storage_confirm" =~ ^[Yy]$ ]]; then
@@ -391,9 +376,8 @@ if [[ "$storage_confirm" =~ ^[Yy]$ ]]; then
     if [[ "$open_shell_confirm" =~ ^[Yy]$ ]]; then
         echo "Abriendo una nueva shell. Por favor, configure el almacenamiento remoto manualmente."
         echo "Escriba 'exit' para volver al script (si es posible) o terminar."
-        # Use bash without exec to return to the script after exiting the sub-shell
         bash
-        echo "Volviendo al script principal..." # This line will execute after exiting the sub-shell
+        echo "Volviendo al script principal..."
     else
         echo "Configuración manual de almacenamiento omitida."
         echo "Saliendo del script."
@@ -403,24 +387,21 @@ else
     echo "Configuración de Almacenamiento Remoto omitida."
 fi
 
-# Configuración de Discos y LVM
+# Disk and LVM Configuration
 echo ""
 read -p "¿Configurar Discos y LVM? (y/N): " disk_config_confirm
 if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
     echo "Configurando Discos..."
 
-    # Listar discos disponibles
     echo "Discos disponibles:"
     lsblk -dno NAME,SIZE,TYPE | grep disk
     echo ""
 
-    # Preguntar si usar LVM
     read -p "¿Implementar LVM? (y/N): " use_lvm_confirm
 
     if [[ "$use_lvm_confirm" =~ ^[Yy]$ ]]; then
         echo "Configurando LVM..."
 
-        # Instalar lvm2 y xfsprogs si no están instalados
         if ! dnf list installed lvm2 &> /dev/null || ! dnf list installed xfsprogs &> /dev/null; then
             echo "Instalando lvm2 y xfsprogs..."
             dnf install -y lvm2 xfsprogs
@@ -432,7 +413,6 @@ if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
             echo "lvm2 y xfsprogs ya están instalados."
         fi
 
-        # Leer Volúmenes Físicos (PVs)
         pv_list=()
         echo "Introduce los nombres de los discos a usar como Volúmenes Físicos (ej: sdb, sdc). Presiona Enter sin escribir nada para terminar."
         while true; do
@@ -440,7 +420,6 @@ if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
             if [ -z "$disk_name" ]; then
                 break
             fi
-            # Basic validation: check if it's a block device
             if [ -b "/dev/$disk_name" ]; then
                 pv_list+=("/dev/$disk_name")
                 echo "Añadido /dev/$disk_name a la lista de PVs."
@@ -461,7 +440,7 @@ if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
             exit 1
         fi
 
-        # Crear Volume Group (VG)
+        # Create Volume Group (VG)
         vg_name="vhr-vg"
         echo "Creando Volume Group '$vg_name'..."
         vgcreate "$vg_name" "${pv_list[@]}"
@@ -470,7 +449,7 @@ if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
             exit 1
         fi
 
-        # Crear Logical Volume (LV)
+        # Create Logical Volume (LV)
         lv_name="backup-lv"
         echo "Creando Logical Volume '$lv_name' en '$vg_name' (usando todo el espacio disponible)..."
         lvcreate -l 100%FREE -n "$lv_name" "$vg_name"
@@ -479,7 +458,7 @@ if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
             exit 1
         fi
 
-        # Obtener la ruta real del LV después de la creación
+        # Get the path of the Logical Volume
         lv_path=$(lvs --noheadings -o lv_path "$vg_name/$lv_name" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
 
         if [ -z "$lv_path" ]; then
@@ -489,7 +468,7 @@ if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
 
         echo "Ruta del Logical Volume detectada: $lv_path"
 
-        # Formatear LV con XFS
+        # Format LV with XFS
         echo "Formateando '$lv_path' con XFS..."
         mkfs.xfs "$lv_path"
         if [ $? -ne 0 ]; then
@@ -497,12 +476,12 @@ if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
             exit 1
         fi
 
-        # Crear directorio de montaje
+        # Create mount point
         mount_point="/data"
         echo "Creando directorio de montaje '$mount_point'..."
         mkdir -p "$mount_point"
 
-        # Montar LV
+        # Mount LV
         echo "Montando '$lv_path' en '$mount_point'..."
         mount "$lv_path" "$mount_point"
         if [ $? -ne 0 ]; then
@@ -514,12 +493,11 @@ if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
         chown -R "$service_username":"$service_username" "$mount_point"
         if [ $? -ne 0 ]; then
             echo "Advertencia: Falló al asignar permisos en '$mount_point' al usuario '$service_username'."
-            # Decide if this should be a fatal error or just a warning
         else
             echo "Permisos de '$mount_point' asignados a '$service_username'."
         fi
 
-        # Agregar a /etc/fstab
+        # Add to /etc/fstab
         echo "Agregando entrada a /etc/fstab..."
         lv_uuid=$(blkid -s UUID -o value "$lv_path")
         if [ -z "$lv_uuid" ]; then
@@ -531,10 +509,8 @@ if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
 
         echo "Configuración de LVM completada."
 
-    else # Caso no-LVM
+    else # non-LVM configuration
         echo "Configurando disco sin LVM..."
-
-        # Instalar xfsprogs si no está instalado
         if ! dnf list installed xfsprogs &> /dev/null; then
             echo "Instalando xfsprogs..."
             dnf install -y xfsprogs
@@ -546,30 +522,26 @@ if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
             echo "xfsprogs ya está instalado."
         fi
 
-        # Preguntar qué disco usar
+        # Ask for disk name
         read -p "Introduce el nombre del disco a usar (ej: sdb): " disk_name
         disk_path="/dev/$disk_name"
-
-        # Basic validation
         if [ ! -b "$disk_path" ]; then
             echo "Error: '$disk_path' no es un dispositivo de bloque válido. Saliendo."
             exit 1
         fi
-
-        # Formatear disco con XFS
+        # Format disk with XFS
         echo "Formateando '$disk_path' con XFS..."
         mkfs.xfs "$disk_path"
         if [ $? -ne 0 ]; then
             echo "Error: Falló el formateo de '$disk_path'."
             exit 1
         fi
-
-        # Crear directorio de montaje
+        # Create mount point
         mount_point="/data"
         echo "Creando directorio de montaje '$mount_point'..."
         mkdir -p "$mount_point"
 
-        # Montar disco
+        # Mount disk
         echo "Montando '$disk_path' en '$mount_point'..."
         mount "$disk_path" "$mount_point"
         if [ $? -ne 0 ]; then
@@ -581,12 +553,11 @@ if [[ "$disk_config_confirm" =~ ^[Yy]$ ]]; then
         chown -R "$service_username":"$service_username" "$mount_point"
         if [ $? -ne 0 ]; then
             echo "Advertencia: Falló al asignar permisos en '$mount_point' al usuario '$service_username'."
-            # Decide if this should be a fatal error or just a warning
         else
             echo "Permisos en '$mount_point' asignados a '$service_username'."
         fi
 
-        # Agregar a /etc/fstab
+        # Add to /etc/fstab
         echo "Agregando entrada a /etc/fstab..."
         disk_uuid=$(blkid -s UUID -o value "$disk_path")
          if [ -z "$disk_uuid" ]; then
@@ -605,6 +576,8 @@ fi
 
 echo ""
 echo "Script de Preparación de Sistema Finalizado."
+
+# --- Cleaning Start ---
 echo "Limpiando sistema (desinstalando tmux)..."
 dnf remove -y tmux
 if [ $? -ne 0 ]; then
@@ -612,7 +585,7 @@ if [ $? -ne 0 ]; then
 else
     echo "tmux desinstalado exitosamente."
 fi
-# --- Fin de la Limpieza ---
+# --- Cleaning End ---
 
 echo "Proceso de preparación completado."
 echo "Por favor, ingresa a la consola de Veeam Backup & Replication y configura el repositorio inmutable."
