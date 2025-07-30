@@ -1,8 +1,11 @@
-# Rocky Linux Imutable Repository Preparation Script
+# [DEPRECATED] & [NOT IN DEVELOPMENT]
+
+
+## Rocky Linux Imutable Repository Preparation Script
 
 This script automates the initial setup of a Rocky Linux server to be used as an immutable repository for Veeam Backup & Replication. It streamlines various system configurations, making the server ready to host your backups securely.
 
-## Features
+### Features
 
 - **Tmux Integration:** Automatically launches the script within a tmux session, protecting against SSH disconnections. Can be skipped with '--no-tmux'.
 - **Hostname Configuration:** Post-install hostname reconfiguration for the server.
@@ -11,7 +14,7 @@ This script automates the initial setup of a Rocky Linux server to be used as an
 - [PENDING] **Remote Storage:** Configure remote storage (NFS, iSCSI, SMB).
 - **Storage:** Storage configuration for local or remote disks. Implement LVM or not. Always format to XFS (Fast Clone feature). Automatic mountpoint to `/data` with correct permissions.
 
-## Pre-requisites
+### Pre-requisites
 
 - Fresh install of Rocky Linux (currently tested on Rocky Linux 9.x)
 - Root (or sudo) privileges for script execution.
@@ -20,7 +23,7 @@ This script automates the initial setup of a Rocky Linux server to be used as an
 - A Disk for the system and a disk (or remote storage) for the backup data.
 - Recommended: SSH key for veeamsvc user (not needed if locked-down).
 
-## Usage:
+### Usage:
 
 1.- Download the script:
 'wget https://raw.githubusercontent.com/itDaru/green-onion/refs/heads/main/vhrs-rocky-sysconfig.sh -o /tmp/vhrs-rocky-sysconfig.sh'
