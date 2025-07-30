@@ -1,0 +1,26 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+*/venv/
+*/.venv/
+*/env/
+*/ENV/
+
+# PyInstaller
+dist/
+build/
+*.spec
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyd
+
+# VS Code
+.vscode/
+
+# OS generated files #
+.DS_Store
+Thumbs.db
