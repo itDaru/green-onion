@@ -1,6 +1,7 @@
 # 🛡️  Linux Repository Manager 🛡️
 
-A Python-based tool to configure and manage a hardened repository.
+A Python-based tool to configure and manage a linux repository.
+Intended for usage with Veeam.
 
 ## 🚀 Features
 
@@ -23,7 +24,7 @@ A Python-based tool to configure and manage a hardened repository.
 
 2.  Follow the menu options to configure network and iSCSI settings.
 
-OR
+###    OR
 
 1.  Download the release binary.
 
