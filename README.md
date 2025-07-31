@@ -2,25 +2,14 @@
 
 ## Table of Contents ✨
 
-    About the Project 🚀 – What this tool is all about.
-
-    Features ⭐ – The cool things it can do.
-
-    Folder Structure 📂 – How everything's organized.
-
-    Getting Started 🛠️ – Your quick start guide.
-
-        Prerequisites ✅ – What you need before you begin.
-
-        Installation ⬇️ – How to set it up.
-
-    Usage 🚀 – How to make it work for you.
-
-    Contributing 🤝 – Join the fun and make it better!
-
-    License 📜 – The legal stuff.
-
-    Contact
+* **About the Project** 🚀 – What this tool is about.
+* **Features** ⭐ – The things it can do.
+* **Folder Structure** 📂 – How's organized.
+* **Getting Started** 🛠️ – Quick start guide.
+    * **Prerequisites** ✅ – What you need.
+* **Usage** 🚀 – How to make it work.
+* **Contributing** 🤝 – Join to make it better!
+* **License** 📜 – The legal stuff.
 
 ## About the Project 🚀
 
@@ -28,9 +17,8 @@ Linux Repository Manager is a python utility designed to effortlessly manage Lin
 
 ## Features ✨
 
-    iSCSI Management: Automate the setup and management of iSCSI disks! 🎯
-
-    Network Configuration: Effortlessly configure network interfaces, set up a static normal interface or a static bond interface. 🌐
+* **iSCSI Management:** Automate the setup and management of iSCSI disks! 🎯
+* **Network Configuration:** Effortlessly configure network interfaces, set up a static normal interface or a static bond interface. 🌐
 
 ## Folder Structure 📂
 
@@ -53,8 +41,8 @@ Here's how to get this tool up and running on your servers
 
 ## Prerequisites ✅
 
-    Python 3.x
-	nmcli utility
+* **Python 3.x**
+* **nmcli utility**
 
 ## Usage 🚀
 
@@ -80,28 +68,6 @@ cd linux-repository-manager/src
 sudo python3 main.py
 ```
 
-## Contributing 🤝
-
-Love what you see? Want to make it even better? Your contributions are super appreciated! 🙌
-
-If you have a brilliant idea or find a bug, don't hesitate! Fork the repo, make your changes, and send a pull request. You can also open an issue with the "enhancement" tag. And hey, a ⭐ star ⭐ for the project would be awesome! Thanks a bunch!
-
-    Fork the Project
-
-    Create your Feature Branch (git checkout -b feature/AmazingFeature)
-
-    Commit your Changes (git commit -m 'Add some AmazingFeature')
-
-    Push to the Branch (git push origin feature/AmazingFeature)
-
-    Open a Pull Request
-
 ## License 📜
 
 This project is open-source and distributed under the MIT License. Check out the LICENSE file for all the details!
-
-## Contact 📧
-
-Got questions or just want to say hi? Feel free to reach out!
-
-Project Link: https://github.com/itDaru/linux-repository-manager
