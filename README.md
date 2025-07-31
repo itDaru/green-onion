@@ -16,7 +16,7 @@ Intended for usage with Veeam.
 
 ## 🖥️ Supported OS:
 
-### RedHat Family:
+### Enterprise Linux Family:
 *   **RedHat Linux Enterprise 9.x**
 *   **CentOS Stream**
 *   **Rocky Linux 9.x**
