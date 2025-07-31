@@ -1,80 +1,32 @@
-# This workflow will build Python executables using PyInstaller
-# and attach them as assets to a GitHub Release.
-
 name: Build and Release Executables
 
 on:
   release:
-    types: [published] # This workflow runs when a new release is published
+    types: [published]
 
 permissions:
-  contents: write # Grant write permissions to upload release assets
+  contents: write
 
 jobs:
   build-executables:
-    strategy:
-      # Build for multiple operating systems
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.10'] # You can specify multiple Python versions if needed, e.g., ['3.8', '3.9', '3.10']
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+    - uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.10'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        # Install your project's dependencies from requirements.txt
-        # If you don't have a requirements.txt, you can remove or comment this line
-        pip install -r requirements.txt
-        # Install PyInstaller
-        pip install pyinstaller
+    - run: python -m pip install --upgrade pip
+    - run: pip install pyinstaller
 
-    - name: Build executable with PyInstaller
-      run: |
-        # IMPORTANT: Replace 'your_app.py' with the path to your main Python script.
-        # Add any necessary PyInstaller options here.
-        # Common options:
-        # --onefile: Create a single executable file.
-        # --windowed: For GUI apps, prevents a console window from appearing.
-        # --name "MyApplicationName": Sets the name of the executable.
-        # --add-data "source;destination": To include data files (e.g., --add-data "assets:assets")
-        
-        # Example for a simple console app:
-        pyinstaller --onefile your_app.py
-
-        # Example for a GUI app (uncomment and adjust if applicable):
-        # pyinstaller --onefile --windowed --name "MyCoolApp" your_app.py
-
-        # Example with data files (adjust paths as needed):
-        # pyinstaller --onefile --windowed --name "MyCoolApp" --add-data "path/to/my_data_folder:my_data_folder" your_app.py
-
-      # Using bash shell for consistent commands across OS, especially for mv
+    - run: pyinstaller --onefile main.py
       shell: bash
 
-    - name: Prepare artifact for upload
-      id: prepare_artifact
+    - id: prepare_artifact
       run: |
-        # PyInstaller creates its output in the 'dist' folder.
-        # The executable name will typically be the name of your main script (e.g., 'your_app').
-        # We need to find the executable and rename it for consistent upload names.
-        
-        # Determine the executable extension based on OS
-        EXECUTABLE_EXTENSION=""
-        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-          EXECUTABLE_EXTENSION=".exe"
-        fi
-
-        # Find the generated executable in the dist folder
-        EXECUTABLE_NAME=$(basename "your_app") # Replace 'your_app' with the expected name of your executable
+        EXECUTABLE_NAME=$(basename "main")
         FOUND_EXECUTABLE=$(find dist -maxdepth 1 -name "${EXECUTABLE_NAME}*" -print -quit)
 
         if [ -z "$FOUND_EXECUTABLE" ]; then
@@ -82,21 +34,18 @@ jobs:
           exit 1
         fi
 
-        ARTIFACT_NAME="${EXECUTABLE_NAME}-${{ matrix.os }}${EXECUTABLE_EXTENSION}"
+        ARTIFACT_NAME="${EXECUTABLE_NAME}-ubuntu"
         mv "${FOUND_EXECUTABLE}" "${ARTIFACT_NAME}"
         
-        echo "Generated artifact: ${ARTIFACT_NAME}"
         echo "artifact_path=${{ github.workspace }}/${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
         echo "asset_name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+      shell: bash
 
-      shell: bash # Ensure bash is used for the shell commands
-
-    - name: Upload executable to Release
-      uses: actions/upload-release-asset@v1
+    - uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is automatically provided by GitHub Actions
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: ${{ steps.prepare_artifact.outputs.artifact_path }}
         asset_name: ${{ steps.prepare_artifact.outputs.asset_name }}
-        asset_content_type: application/octet-stream # Standard content type for binary files
+        asset_content_type: application/octet-stream
