@@ -14,7 +14,6 @@ def _generate_password(length=16):
 def _write_ssh_key(username, public_key):
     """Writes a public SSH key to the user's authorized_keys file."""
     try:
-        # Get user's uid and gid to set correct ownership
         user_info = pwd.getpwnam(username)
         uid = user_info.pw_uid
         gid = user_info.pw_gid
@@ -22,16 +21,13 @@ def _write_ssh_key(username, public_key):
         ssh_dir = f"/home/{username}/.ssh"
         auth_keys_file = f"{ssh_dir}/authorized_keys"
 
-        # Create .ssh directory if it doesn't exist
         os.makedirs(ssh_dir, exist_ok=True)
         os.chmod(ssh_dir, 0o700)
         shutil.chown(ssh_dir, user=uid, group=gid)
 
-        # Append key to authorized_keys
         with open(auth_keys_file, 'a') as f:
             f.write(f"{public_key}\n")
 
-        # Set permissions and ownership for authorized_keys
         os.chmod(auth_keys_file, 0o600)
         shutil.chown(auth_keys_file, user=uid, group=gid)
 
@@ -116,26 +112,21 @@ def setup_veeam_user():
     print(f'Setting up user "{username}"...')
 
     try:
-        # Check if user already exists to avoid modifying an existing user
         pwd.getpwnam(username)
         print(f"User '{username}' already exists. Aborting setup.")
         input("Press Enter to continue...")
         return
     except KeyError:
-        # User does not exist, which is expected.
         pass
 
     try:
-        # Create the user
         subprocess.run(["useradd", "-m", "-s", shell, username], check=True)
         print(f"User '{username}' created successfully.")
 
-        # Ask to attach SSH key
         ssh_choice = input(f"Do you want to add an SSH public key for '{username}'? (yes/no) [no]: ").strip().lower()
         if ssh_choice in ['yes', 'y']:
             _setup_ssh_key(username)
 
-        # Generate and set password non-interactively
         password = _generate_password()
         subprocess.run(
             ["chpasswd"],
@@ -151,7 +142,6 @@ def setup_veeam_user():
         print(f"Password: {password}\n")
         print("="*50 + "\n")
 
-        # Ask to add to sudoers, default to yes
         sudo_choice = input(f"Do you want to add user '{username}' to sudoers? (yes/no) [yes]: ").strip().lower()
         if sudo_choice in ['', 'yes', 'y']:
             sudo_group = _get_sudo_group()
@@ -171,16 +161,14 @@ def setup_ansible_user():
     shell = "/sbin/nologin"
     print(f'Setting up user "{username}" for automation...')
 
-    # Check if user already exists
     try:
         pwd.getpwnam(username)
         print(f"User '{username}' already exists. Aborting setup.")
         input("Press Enter to continue...")
         return
     except KeyError:
-        pass  # Good, user doesn't exist
+        pass
 
-    # Security warning and confirmation
     print("\n" + "!"*60)
     print("! WARNING: SECURITY RISK                                     !")
     print("! This will create a user with PASSWORDLESS SUDO access.     !")
@@ -193,7 +181,6 @@ def setup_ansible_user():
         input("Press Enter to continue...")
         return
 
-    # Get mandatory SSH key
     public_key = input("Paste the public SSH key for the 'ansible' user: ").strip()
     if not public_key:
         print("A public key is mandatory for the 'ansible' user. Aborting setup.")
