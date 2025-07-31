@@ -55,7 +55,7 @@ Intended for usage with Veeam.
     wget https://github.com/itDaru/linux-repository-manager/releases/latest/download/lrm
     chmod +x lrm
     sudo lrm
-```
+    ```
 
 ### From Source
 
