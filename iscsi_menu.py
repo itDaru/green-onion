@@ -1,6 +1,7 @@
 import subprocess
 from core import clear_screen, display_menu, get_choice
 from iscsi_auth import setup_chap_authentication
+import iscsi_setup
 
 def configure_iscsi():
     iscsi_options = [
@@ -18,14 +19,14 @@ def configure_iscsi():
         if choice == 0:
             break
         elif choice == 1:
-            print("Connecting to iSCSI Server...\n")
+            iscsi_setup.configure_iscsi_connection()
         elif choice == 2:
             setup_chap_authentication()
         elif choice == 3:
-            print("Listing iSCSI disks...\n")
+            iscsi_setup.list_iscsi_disks()
         elif choice == 4:
-            print("Mounting iSCSI disk...\n")
+            iscsi_setup.list_iscsi_disks()
         elif choice == 5:
-            print("Formatting iSCSI disk...\n")
+            iscsi_setup.format_iscsi_disk()
         else:
             print("Invalid choice. Try again.\n")
