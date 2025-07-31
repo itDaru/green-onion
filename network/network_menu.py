@@ -1,5 +1,5 @@
 from core import clear_screen, display_menu, get_choice
-import network_setup
+from network import network_setup
 
 def network_menu():
     options = [

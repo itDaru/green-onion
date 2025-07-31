@@ -1,14 +1,13 @@
 from core import clear_screen, display_menu, get_choice
-from iscsi_auth import setup_chap_authentication
-import iscsi_setup
+from iscsi import iscsi_setup
 
 def configure_iscsi():
     iscsi_options = [
         "Connect to iSCSI Server",
         "Setup CHAP Authentication",
-        "List iSCSI disks",
-        "Mount iSCSI disk",
-        "Format iSCSI disk"
+        "List iSCSI Disks",
+        "Format iSCSI Disk",
+        "Mount iSCSI Disk"
     ]
     while True:
         clear_screen()
@@ -24,8 +23,8 @@ def configure_iscsi():
         elif choice == 3:
             iscsi_setup.list_iscsi_disks()
         elif choice == 4:
-            iscsi_setup.mount_iscsi_disk()
-        elif choice == 5:
             iscsi_setup.format_iscsi_disk()
+        elif choice == 5:
+            iscsi_setup.mount_iscsi_disk()
         else:
             print("Invalid choice. Try again.\n")

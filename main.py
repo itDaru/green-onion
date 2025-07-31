@@ -1,13 +1,13 @@
 import core
-import network_menu
-import iscsi_menu
+from network import network_menu
+from iscsi import iscsi_menu
 
 def main():
     options = [
         "Configure Networking",
         "Configure iSCSI",
         "Configure Local Disks",
-        "Reset Passwords",
+        "Setup Users",
         "Setup SSH with Keys"
     ]
 
@@ -23,8 +23,6 @@ def main():
             network_menu.network_menu()
         elif choice == 2:
             iscsi_menu.configure_iscsi()
-        elif choice == 5:
-            network_setup.clear_configurations()
         else:
             print(f"You selected option {choice}: {options[choice-1]}\n")
 
