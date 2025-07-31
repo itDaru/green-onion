@@ -1,12 +1,13 @@
 # 🛡️  Linux Repository Manager 🛡️
 
-A Python-based tool to configure and manage a Linux system, focusing on network, storage, and user setup for hardened repositories. The tool is built with security best practices in mind, including secure password generation and safe user provisioning.
+A Python-based tool to configure and manage a Linux system, focusing on network, storage, and user setup for hardened repositories.
+The tool is built with security best practices in mind, including secure password generation and safe user provisioning.
 
 Intended for usage with Veeam.
 
 ## 🚀 Features
 
-*   **Network Configuration** 🌐: Streamline network settings with interface selection and bond/plain networking options.
+*   **Network Configuration** 🌐: Setup network with interface selection and bond/plain networking options.
 *   **iSCSI Management** 🎯: Discover and connect to iSCSI targets, manage sessions, and configure CHAP authentication for secure storage connections.
 *   **User Management** 👤: Create and manage system users with fine-grained controls.
     *   Create standard users with interactive password setup and optional SSH key/sudo access.
@@ -28,22 +29,51 @@ Intended for usage with Veeam.
 
 ## 🛠️  Usage
 
-1.  Run the main script with root privileges:
+### From Binary Release
+
+1.  Download the release binary:
+    ```bash
+    wget https://github.com/itDaru/linux-repository-manager/releases/latest/download/lrm
+    ```
+
+2.  Make the binary executable:
+
+   ```bash
+   chmod +x ./lrm
+   ```
+
+3.  Run the binary with root privileges:
+
+    ```bash
+    sudo ./lrm
+    ```
+
+
+* **In Summary:**
+```bash
+wget https://github.com/itDaru/linux-repository-manager/releases/latest/download/lrm
+chmod +x
+sudo ./lrm
+```
+
+### From Source
+
+1.  Clone the repository:
+
+    ```bash
+    git clone https://github.com/itDaru/linux-repository-manager.git
+    ```
+
+2.  Access the source files:
+
+    ```bash
+    cd linux-repository-manager/src
+    ```
+
+3.  Run the main script with root privileges:
 
     ```bash
     sudo python3 main.py
-    ```
-
-2.  Follow the menu options to configure network, iSCSI, and user settings.
-
-###    OR
-
-1.  Download the release binary.
-
-2.  Run the binary with root privileges:
-
-    ```bash
-    sudo exec lrm
     ```
 
 ## 📂 File Structure
