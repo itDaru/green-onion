@@ -7,7 +7,7 @@ Intended for usage with Veeam.
 ## 🚀 Features
 
 *   **Network Configuration**: Streamline network settings with interface selection and bond/plain networking options.
-*   **iSCSI Configuration**: Connect to iSCSI servers and set up CHAP authentication.
+*   **iSCSI Configuration**: Connect to iSCSI servers, setup disks, mount filesystems.
 *   **Configuration Clearing**: Easily clear existing network configurations.
 
 ## ⚙️  Prerequisites
@@ -35,9 +35,3 @@ Intended for usage with Veeam.
     sudo exec lrm
     ```
 
-## 📂 File Structure
-├── core.py # Core functions (clear_screen, display_menu, get_choice) 
-├── iscsi_config.py # iSCSI configuration functions 
-├── main.py # Main entry point 
-├── network_config.py # Network configuration functions 
-└── README.md # Documentation
