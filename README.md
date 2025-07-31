@@ -1,76 +1,57 @@
-# Linux Repository Manager 🐧
+# 🛡️  Linux Repository Manager 🛡️
 
-## Table of Contents ✨
+A Python-based tool to configure and manage a Linux system, focusing on network, storage, and user setup for hardened repositories. The tool is built with security best practices in mind, including secure password generation and safe user provisioning.
 
-* **About the Project** 🚀 – What this tool is about.
-* **Features** ⭐ – The things it can do.
-* **Folder Structure** 📂 – How's organized.
-* **Getting Started** 🛠️ – Quick start guide.
-    * **Prerequisites** ✅ – What you need.
-* **Usage** 🚀 – How to make it work.
-* **License** 📜 – The legal stuff.
+Intended for usage with Veeam.
 
-## About the Project 🚀
+## 🚀 Features
 
-Linux Repository Manager is a python utility designed to effortlessly manage Linux system configurations. It currently provides powerful functionalities for iSCSI and network settings, aiming to simplify complex administrative tasks.
+*   **Network Configuration** 🌐: Streamline network settings with interface selection and bond/plain networking options.
+*   **iSCSI Management** 🎯: Discover and connect to iSCSI targets, manage sessions, and configure CHAP authentication for secure storage connections.
+*   **User Management** 👤: Create and manage system users with fine-grained controls.
+    *   Create standard users with interactive password setup and optional SSH key/sudo access.
+    *   Set up a dedicated `veeamsvc` user with a secure, randomly generated password.
+    *   Provision a passwordless `ansible` user for automation, secured with an SSH key and non-interactive shell.
+    *   Disable or completely remove users from the system.
 
-## Features ✨
+## ⚙️  Prerequisites
 
-* **iSCSI Management:** Automate the setup and management of iSCSI disks! 🎯
-* **Network Configuration:** Effortlessly configure network interfaces, set up a static normal interface or a static bond interface. 🌐
+*   Rocky Linux 9.x
+*   Python 3.x
 
-## Folder Structure 📂
+## 🛠️  Usage
 
-This project keeps things with a straightforward structure:
+1.  Run the main script with root privileges:
 
-```
-.
-├── .github/              # GitHub 🤖
-├── src/                  # Python utlity source code 🐍
-│   ├── iscsi/            # Modules for iSCSI ✨
-│   ├── network/          # Modules for networking 🧙‍♂️
-│   ├── core/             # Core utilities and shared functions 🧠
-│   └── main.py           # The main entry point for the application ▶️
-├── .gitignore            # Files Git should totally ignore 🤫
-├── LICENSE.md               # The project's license file 📜
-└── README.md             # You are here! 👋
+    ```bash
+    sudo python3 main.py
+    ```
 
-```
+2.  Follow the menu options to configure network, iSCSI, and user settings.
 
-## Getting Started 🛠️
+###    OR
 
-Here's how to get this tool up and running on your servers
+1.  Download the release binary.
 
-## Prerequisites ✅
-```
-Python 3.x
-nmcli utility
-```
+2.  Run the binary with root privileges:
 
-## Usage 🚀
+    ```bash
+    sudo exec lrm
+    ```
 
-You've got a couple of ways to use Linux Repository Manager:
-
-### Download the binary:
-Want to use it straightforward?
-
-```bash
-wget https://github.com/itDaru/linux-repository-manager/releases/latest/download/lrm
-chmod +x lrm
-sudo ./lrm
-```
-
-### Cloning the Repository and Running Directly:
-Prefer to roll with the source code?
-Clone the repo and execute main.py directly.
-This is great if you want to poke around the code or contribute. 🧑‍💻
-
-```bash
-git clone https://github.com/itDaru/linux-repository-manager.git
-cd linux-repository-manager/src
-sudo python3 main.py
-```
-
-## License 📜
-
-This project is open-source and distributed under the GNU GPL v3.0 License.
+## 📂 File Structure
+├── main.py             # Main entry point
+├── core.py             # Core functions (menu, screen clear)
+├── networking/         # Networking configuration module
+│   ├── network_menu.py
+│   └── network_setup.py
+├── iscsi/              # iSCSI configuration module
+│   ├── iscsi_menu.py
+│   ├── iscsi_auth.py
+│   └── iscsi_setup.py
+├── disks/              # (Future) Local disk configuration
+├── users/              # User management module
+│   ├── users_menu.py
+│   └── users_setup.py
+├── ssh/                # (Future) SSH configuration
+└── README.md           # Documentation
