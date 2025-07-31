@@ -73,4 +73,4 @@ sudo python3 main.py
 
 ## License 📜
 
-This project is open-source and distributed under the MIT License. Check out the LICENSE file for all the details!
+This project is open-source and distributed under the GNU GPL v3.0 License.
