@@ -4,7 +4,21 @@ def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def display_menu(options, is_main_menu=False):
-    print("[Linux Repository Manager]\n\nSelect an option:\n")
+    print("""
+  _      _                          ____                           _  _                      
+ | |    (_) _ __   _   _ __  __    |  _ \  ___  _ __    ___   ___ (_)| |_  ___   _ __  _   _ 
+ | |    | || '_ \ | | | |\ \/ /    | |_) |/ _ \| '_ \  / _ \ / __|| || __|/ _ \ | '__|| | | |
+ | |___ | || | | || |_| | >  <     |  _ <|  __/| |_) || (_) |\__ \| || |_| (_) || |   | |_| |
+ |_____||_||_| |_| \__,_|/_/\_\    |_| \_\\___|| .__/  \___/ |___/|_| \__|\___/ |_|    \__, |
+                                               |_|                                     |___/ 
+                                    __  __                                                   
+                                   |  \/  |  __ _  _ __    __ _   __ _   ___  _ __           
+                                   | |\/| | / _` || '_ \  / _` | / _` | / _ \| '__|          
+                                   | |  | || (_| || | | || (_| || (_| ||  __/| |             
+                                   |_|  |_| \__,_||_| |_| \__,_| \__, | \___||_|             
+                                                                 |___/                     
+""")
+    print("\nSelect an option:\n")
     for i, option in enumerate(options):
         print(f"{i+1}. {option}")
     if is_main_menu:
