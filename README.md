@@ -48,6 +48,7 @@ Intended for usage with Veeam.
 
 ## 📂 File Structure
 
+```
 .
 ├── 📂 .github
 ├── 📂 src
@@ -71,3 +72,4 @@ Intended for usage with Veeam.
 ├── .gitignore
 ├── LICENSE.md
 └── README.md
+```
