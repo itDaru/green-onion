@@ -1,4 +1,4 @@
-name: Build and Release Executables
+name: B&P Python package with PyInstaller
 
 on:
   release:
