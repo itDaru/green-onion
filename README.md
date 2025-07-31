@@ -38,22 +38,23 @@ Intended for usage with Veeam.
 
 2.  Make the binary executable:
 
-   ```bash
-   chmod +x ./lrm
-   ```
+    ```bash
+    chmod +x lrm
+    ```
 
 3.  Run the binary with root privileges:
 
     ```bash
-    sudo ./lrm
+    sudo lrm
     ```
 
 
 * **In Summary:**
-```bash
-wget https://github.com/itDaru/linux-repository-manager/releases/latest/download/lrm
-chmod +x
-sudo ./lrm
+
+    ```bash
+    wget https://github.com/itDaru/linux-repository-manager/releases/latest/download/lrm
+    chmod +x lrm
+    sudo lrm
 ```
 
 ### From Source
