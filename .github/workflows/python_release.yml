@@ -26,6 +26,7 @@ jobs:
 
     - id: prepare_artifact
       run: |
+        ARTIFACT_NAME=lrm
         EXECUTABLE_NAME=$(basename "main")
         FOUND_EXECUTABLE=$(find dist -maxdepth 1 -name "${EXECUTABLE_NAME}*" -print -quit)
 
