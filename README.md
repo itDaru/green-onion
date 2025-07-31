@@ -8,7 +8,6 @@
 * **Getting Started** 🛠️ – Quick start guide.
     * **Prerequisites** ✅ – What you need.
 * **Usage** 🚀 – How to make it work.
-* **Contributing** 🤝 – Join to make it better!
 * **License** 📜 – The legal stuff.
 
 ## About the Project 🚀
@@ -24,6 +23,7 @@ Linux Repository Manager is a python utility designed to effortlessly manage Lin
 
 This project keeps things with a straightforward structure:
 
+```
 .
 ├── .github/              # GitHub 🤖
 ├── src/                  # Python utlity source code 🐍
@@ -34,6 +34,8 @@ This project keeps things with a straightforward structure:
 ├── .gitignore            # Files Git should totally ignore 🤫
 ├── LICENSE               # The project's license file 📜
 └── README.md             # You are here! 👋
+
+```
 
 ## Getting Started 🛠️
 
