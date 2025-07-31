@@ -45,7 +45,7 @@ Intended for usage with Veeam.
 3.  Run the binary with root privileges:
 
     ```bash
-    sudo lrm
+    sudo ./lrm
     ```
 
 
@@ -54,7 +54,7 @@ Intended for usage with Veeam.
     ```bash
     wget https://github.com/itDaru/linux-repository-manager/releases/latest/download/lrm
     chmod +x lrm
-    sudo lrm
+    sudo ./lrm
     ```
 
 ### From Source
