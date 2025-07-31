@@ -6,9 +6,8 @@ Intended for usage with Veeam.
 
 ## 🚀 Features
 
-*   **Network Configuration**: Streamline network settings with interface selection and bond/plain networking options.
+*   **Network Configuration**: Setup Bonded/Normal networking on the host.
 *   **iSCSI Configuration**: Connect to iSCSI servers, setup disks, mount filesystems.
-*   **Configuration Clearing**: Easily clear existing network configurations.
 
 ## ⚙️  Prerequisites
 
