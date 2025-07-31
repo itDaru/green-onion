@@ -1,38 +1,38 @@
-Linux Repository Manager 🐧
+# Linux Repository Manager 🐧
 
-Table of Contents
+## Table of Contents ✨
 
-	About the Project 🚀
+    About the Project 🚀 – What this tool is all about.
 
-    Features ✨
+    Features ⭐ – The cool things it can do.
 
-    Folder Structure 📂
+    Folder Structure 📂 – How everything's organized.
 
-    Getting Started 🛠️
+    Getting Started 🛠️ – Your quick start guide.
 
-        Prerequisites ✅
+        Prerequisites ✅ – What you need before you begin.
 
-        Installation ⬇️
+        Installation ⬇️ – How to set it up.
 
-    Usage 🚀
+    Usage 🚀 – How to make it work for you.
 
-    Contributing 🤝
+    Contributing 🤝 – Join the fun and make it better!
 
-    License 📜
+    License 📜 – The legal stuff.
 
-    Contact 📧
+    Contact
 
-About the Project 🚀
+## About the Project 🚀
 
 Linux Repository Manager is a python utility designed to effortlessly manage Linux system configurations. It currently provides powerful functionalities for iSCSI and network settings, aiming to simplify complex administrative tasks.
 
-Features ✨
+## Features ✨
 
     iSCSI Management: Automate the setup and management of iSCSI disks! 🎯
 
     Network Configuration: Effortlessly configure network interfaces, set up a static normal interface or a static bond interface. 🌐
 
-Folder Structure 📂
+## Folder Structure 📂
 
 This project keeps things with a straightforward structure:
 
@@ -47,30 +47,32 @@ This project keeps things with a straightforward structure:
 ├── LICENSE               # The project's license file 📜
 └── README.md             # You are here! 👋
 
-Getting Started 🛠️
+## Getting Started 🛠️
 
 Here's how to get this tool up and running on your servers
 
-Prerequisites ✅
+## Prerequisites ✅
 
     Python 3.x
 	nmcli utility
 
-Usage 🚀
+## Usage 🚀
 
 You've got a couple of ways to use Linux Repository Manager:
 
-    [Recommended]
-    Using a Release Binary (if available):
-    wget https://github.com/itDaru/linux-repository-manager/releases/latest/download/lrm
+### Download the binary:
+Want to use it straightforward?
 
-# Example: Make the binary executable and run it with superuser powers
+```bash
+wget https://github.com/itDaru/linux-repository-manager/releases/latest/download/lrm
 chmod +x lrm
 sudo ./lrm
+```
 
-Cloning the Repository and Running Directly:
-Prefer to roll with the source code? No problem! 
-Clone the repo and execute main.py directly. This is great if you want to poke around the code or contribute. 🧑‍💻
+### Cloning the Repository and Running Directly:
+Prefer to roll with the source code?
+Clone the repo and execute main.py directly.
+This is great if you want to poke around the code or contribute. 🧑‍💻
 
 ```bash
 git clone https://github.com/itDaru/linux-repository-manager.git
@@ -78,7 +80,7 @@ cd linux-repository-manager/src
 sudo python3 main.py
 ```
 
-# Contributing 🤝
+## Contributing 🤝
 
 Love what you see? Want to make it even better? Your contributions are super appreciated! 🙌
 
@@ -94,11 +96,11 @@ If you have a brilliant idea or find a bug, don't hesitate! Fork the repo, make 
 
     Open a Pull Request
 
-# License 📜
+## License 📜
 
 This project is open-source and distributed under the MIT License. Check out the LICENSE file for all the details!
 
-# Contact 📧
+## Contact 📧
 
 Got questions or just want to say hi? Feel free to reach out!
 
