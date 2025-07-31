@@ -21,7 +21,7 @@ jobs:
     - run: python -m pip install --upgrade pip
     - run: pip install pyinstaller
 
-    - run: pyinstaller --onefile main.py
+    - run: pyinstaller --onefile src/main.py
       shell: bash
 
     - id: prepare_artifact
