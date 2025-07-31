@@ -2,7 +2,7 @@ import subprocess
 import os
 import time
 
-def is_iscsi_device(device):
+def is_iscsi_device(device):    # iSCSI Disk Check
     try:
         transport = subprocess.check_output(
             ["udevadm", "info", "--query=property", "--name=" + device],
@@ -14,9 +14,8 @@ def is_iscsi_device(device):
     except subprocess.CalledProcessError:
         return False
 
-def list_iscsi_disks():
+def list_iscsi_disks():         # iSCSI Disk List
     try:
-        # Get active iSCSI sessions
         sessions_command = ["iscsiadm", "-m", "session"]
         sessions_result = subprocess.run(sessions_command, capture_output=True, text=True, check=True)
         sessions_output = sessions_result.stdout
@@ -33,8 +32,6 @@ def list_iscsi_disks():
                 iqn = parts[2]
                 target_ip = parts[3].split(':')[0]
                 print(f"  IQN: {iqn}, IP: {target_ip}")
-
-        # List iSCSI disks using lsblk
         lsblk_command = ["lsblk", "-d", "-n", "-o", "NAME,SIZE,MOUNTPOINT,TYPE,TRAN"]
         lsblk_result = subprocess.run(lsblk_command, capture_output=True, text=True, check=True)
         lsblk_output = lsblk_result.stdout
@@ -51,9 +48,8 @@ def list_iscsi_disks():
 
     input("Press Enter to continue...")
 
-def format_iscsi_disk():
+def format_iscsi_disk():        # iSCSI Disk Format
     try:
-        # List iSCSI disks and their partitions using lsblk
         lsblk_command = ["lsblk", "-n", "-o", "NAME,SIZE,TYPE,TRAN"]
         lsblk_result = subprocess.run(lsblk_command, capture_output=True, text=True, check=True)
         lsblk_output = lsblk_result.stdout
@@ -70,7 +66,6 @@ def format_iscsi_disk():
             input("Press Enter to continue...")
             return
 
-        # Get partitions for each iSCSI disk
         all_partitions = []
         for disk in iscsi_disks:
             lsblk_partition_command = ["lsblk", "-n", "-o", "NAME,SIZE,TYPE,TRAN", f"/dev/{disk}"]
@@ -107,7 +102,6 @@ def format_iscsi_disk():
 
         disk_path = f"/dev/{selected_disk}"
 
-        # Filesystem selection
         print("\nAvailable filesystems: xfs, ext4, ext3, ext2")
         fs_choice = input("Enter the filesystem to use (default: xfs): ").lower()
         if not fs_choice:
@@ -125,7 +119,6 @@ def format_iscsi_disk():
         if confirmation == "yes":
             path_to_format = disk_path
 
-            # If a whole disk is selected, partition it first.
             if selected_disk in iscsi_disks:
                 print(f"Partitioning {path_to_format}...")
                 partition_command = ["parted", "-s", path_to_format, "mklabel", "gpt"]
@@ -134,7 +127,6 @@ def format_iscsi_disk():
                 create_partition_command = ["parted", "-s", path_to_format, "mkpart", "primary", "0%", "100%"]
                 subprocess.run(create_partition_command, check=True)
                 path_to_format += "1"
-                # Give udev time to create the device node
                 print("Waiting for partition to be created...")
                 subprocess.run(["partprobe"], check=True, capture_output=True)
                 time.sleep(2)
@@ -168,7 +160,6 @@ def format_iscsi_disk():
 
 def mount_iscsi_disk():
     try:
-        # 1. Get mount point
         create_dir_choice = input("Do you want to create a new directory for the mount point? (yes/no) [yes]: ").lower().strip()
         if create_dir_choice in ['', 'yes', 'y']:
             mount_path = input("Enter the full path for the mount point [/srv/veeam]: ").strip()
@@ -189,7 +180,6 @@ def mount_iscsi_disk():
                 else:
                     print(f"Error: Directory '{mount_path}' does not exist or is not a directory. Please provide a valid path.")
 
-        # 2. List iSCSI disks and partitions
         lsblk_command = ["lsblk", "-n", "-o", "NAME,TYPE,TRAN"]
         lsblk_result = subprocess.run(lsblk_command, capture_output=True, text=True, check=True)
         
@@ -244,7 +234,7 @@ def mount_iscsi_disk():
             input("Press Enter to continue...")
             return
         except subprocess.CalledProcessError:
-            pass # Not mounted, which is what we want.
+            pass
 
         print(f"Mounting {device_to_mount} on {mount_path}...")
         subprocess.run(["mount", device_to_mount, mount_path], check=True)
