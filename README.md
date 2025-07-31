@@ -1,6 +1,7 @@
 # 🛡️  Linux Repository Manager 🛡️
 
 A Python-based tool to configure and manage a linux repository.
+
 Intended for usage with Veeam.
 
 ## 🚀 Features
@@ -31,7 +32,7 @@ Intended for usage with Veeam.
 2.  Run the binary with root privileges:
 
     ```bash
-    sudo exec lr-manager
+    sudo exec lrm
     ```
 
 ## 📂 File Structure

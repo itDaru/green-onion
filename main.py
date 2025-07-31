@@ -1,19 +1,14 @@
 import core
-import network_config
-import iscsi_config
-import os
+import network_menu
+import iscsi_menu
 
 def main():
-    if os.geteuid() != 0:
-        print("WARNING: THIS SCRIPT SHOULD BE RUN AS ROOT.\nExit the script and re-run it as root.")
-        input("Press [Enter] to continue as a non-root user under your own risk.")
-
     options = [
-        "Configure Network",
+        "Configure Networking",
         "Configure iSCSI",
-        "Another action",
-        "Perform task",
-        "Clear Configurations"
+        "Configure Local Disks",
+        "Reset Passwords",
+        "Setup SSH with Keys"
     ]
 
     while True:
@@ -25,11 +20,11 @@ def main():
             print("Exiting...")
             break
         elif choice == 1:
-            network_config.configure_network()
+            network_menu.network_menu()
         elif choice == 2:
-            iscsi_config.configure_iscsi()
+            iscsi_menu.configure_iscsi()
         elif choice == 5:
-            network_config.clear_configurations()
+            network_setup.clear_configurations()
         else:
             print(f"You selected option {choice}: {options[choice-1]}\n")
 
