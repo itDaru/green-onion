@@ -1,4 +1,3 @@
-import subprocess
 from core import clear_screen, display_menu, get_choice
 from iscsi_auth import setup_chap_authentication
 import iscsi_setup
@@ -25,7 +24,7 @@ def configure_iscsi():
         elif choice == 3:
             iscsi_setup.list_iscsi_disks()
         elif choice == 4:
-            iscsi_setup.list_iscsi_disks()
+            iscsi_setup.mount_iscsi_disk()
         elif choice == 5:
             iscsi_setup.format_iscsi_disk()
         else:
