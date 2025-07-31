@@ -3,7 +3,6 @@ from network import network_menu
 from iscsi import iscsi_menu
 from users import users_menu
 
-
 def main():
     options = [
         "Configure Networking",
