@@ -34,8 +34,7 @@ jobs:
           exit 1
         fi
 
-        ARTIFACT_NAME="${EXECUTABLE_NAME}-ubuntu"
-        mv "${FOUND_EXECUTABLE}" "${ARTIFACT_NAME}"
+        mv "${FOUND_EXECUTABLE}" "lrm"
         
         echo "artifact_path=${{ github.workspace }}/${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
         echo "asset_name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
