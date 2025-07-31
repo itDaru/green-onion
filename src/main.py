@@ -2,13 +2,14 @@ import core
 from network import network_menu
 from iscsi import iscsi_menu
 from users import users_menu
-
+from ssh import ssh_menu
+from storage import storage_menu
 
 def main():
     options = [
         "Configure Networking",
         "Configure iSCSI",
-        "Configure Local Disks",
+        "Configure Local Storage",
         "Setup Users",
         "Setup SSH with Keys"
     ]
@@ -25,8 +26,12 @@ def main():
             network_menu.network_menu()
         elif choice == 2:
             iscsi_menu.configure_iscsi()
+        elif choice == 3:
+            storage_menu.storage_menu()
         elif choice == 4:
             users_menu.users_menu()
+        elif choice == 5:
+            ssh_menu.ssh_menu()
         else:
             print(f"You selected option {choice}: {options[choice-1]}\n")
 
