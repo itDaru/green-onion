@@ -14,9 +14,16 @@ Intended for usage with Veeam.
     *   Provision a passwordless `ansible` user for automation, secured with an SSH key and non-interactive shell.
     *   Disable or completely remove users from the system.
 
+## 🖥️ Supported OS:
+
+### RedHat Family:
+*   **RedHat Linux Enterprise 9.x**
+*   **CentOS Stream**
+*   **Rocky Linux 9.x**
+
+
 ## ⚙️  Prerequisites
 
-*   Rocky Linux 9.x
 *   Python 3.x
 
 ## 🛠️  Usage
@@ -40,18 +47,27 @@ Intended for usage with Veeam.
     ```
 
 ## 📂 File Structure
-├── main.py             # Main entry point
-├── core.py             # Core functions (menu, screen clear)
-├── networking/         # Networking configuration module
-│   ├── network_menu.py
-│   └── network_setup.py
-├── iscsi/              # iSCSI configuration module
-│   ├── iscsi_menu.py
-│   ├── iscsi_auth.py
-│   └── iscsi_setup.py
-├── disks/              # (Future) Local disk configuration
-├── users/              # User management module
-│   ├── users_menu.py
-│   └── users_setup.py
-├── ssh/                # (Future) SSH configuration
-└── README.md           # Documentation
+
+.
+├── 📂 .github
+├── 📂 src
+│   ├── 📂 iscsi
+│   │   ├── iscsi_auth.py
+│   │   ├── iscsi_menu.py
+│   │   └── iscsi_setup.py
+│   ├── 📂 network
+│   │   ├── network_menu.py
+│   │   └── network_setup.py
+│   ├── 📂 ssh
+│   │   ├── ssh_keygen.py
+│   │   ├── ssh_menu.py
+│   │   └── ssh_setup.py
+│   ├── 📂 storage
+│   │   ├── storage_menu.py
+│   │   └── storage_setup.py
+│   └── 📂 users
+│       ├── users_menu.py
+│       └── users_setup.py
+├── .gitignore
+├── LICENSE.md
+└── README.md
