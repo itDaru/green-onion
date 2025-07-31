@@ -7,21 +7,23 @@ Intended for usage with Veeam.
 
 ## 🚀 Features
 
-*   **Network Configuration** 🌐: Setup network with interface selection and bond/plain networking options.
+*   **Network Configuration** 🌐: Set up network interfaces with bonding/NIC teaming options.
 *   **iSCSI Management** 🎯: Discover and connect to iSCSI targets, manage sessions, and configure CHAP authentication for secure storage connections.
-*   **User Management** 👤: Create and manage system users with fine-grained controls.
+*   **Local Storage Management** 💾: List, format, and mount local disks.
+*   **User Management** 👤: Create and manage system users.
     *   Create standard users with interactive password setup and optional SSH key/sudo access.
     *   Set up a dedicated `veeamsvc` user with a secure, randomly generated password.
     *   Provision a passwordless `ansible` user for automation, secured with an SSH key and non-interactive shell.
     *   Disable or completely remove users from the system.
+*   **SSH Management** 🔑: Enable/disable the SSH service, apply security hardening, and generate new SSH key pairs.
 
-## 🖥️ Supported OS:
+## ⚙️  Supported Systems:
 
-### Enterprise Linux Family:
-*   **RedHat Linux Enterprise 9.x**
-*   **CentOS Stream**
-*   **Rocky Linux 9.x**
-
+*   **Systems with Network Manager** (Enterprise Linux)
+*   **Systems with Ifupdown** (Debian)
+*   **Systems with Netplan** (Ubuntu)
+*   **Systems with wicked** (SUSE)
+*   **Systems with Networkd** (Others)
 
 ## ⚙️  Prerequisites
 
@@ -88,8 +90,15 @@ Intended for usage with Veeam.
 │   │   ├── iscsi_menu.py
 │   │   └── iscsi_setup.py
 │   ├── 📂 network
+│   │   ├── network_check.py
 │   │   ├── network_menu.py
-│   │   └── network_setup.py
+│   │   ├── network_setup.py
+│   │   ├── network_setup_ifupdown.py
+│   │   ├── network_setup_netifrc.py
+│   │   ├── network_setup_netplan.py
+│   │   ├── network_setup_networkd.py
+│   │   ├── network_setup_networkmanager.py
+│   │   └── network_setup_wicked.py
 │   ├── 📂 ssh
 │   │   ├── ssh_keygen.py
 │   │   ├── ssh_menu.py
