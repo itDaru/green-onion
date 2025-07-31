@@ -32,7 +32,7 @@ This project keeps things with a straightforward structure:
 │   ├── core/             # Core utilities and shared functions 🧠
 │   └── main.py           # The main entry point for the application ▶️
 ├── .gitignore            # Files Git should totally ignore 🤫
-├── LICENSE               # The project's license file 📜
+├── LICENSE.md               # The project's license file 📜
 └── README.md             # You are here! 👋
 
 ```
@@ -42,9 +42,10 @@ This project keeps things with a straightforward structure:
 Here's how to get this tool up and running on your servers
 
 ## Prerequisites ✅
-
-* **Python 3.x**
-* **nmcli utility**
+```
+Python 3.x
+nmcli utility
+```
 
 ## Usage 🚀
 
