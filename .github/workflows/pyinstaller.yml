@@ -1,0 +1,59 @@
+name: B&P Python package with PyInstaller
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-executables:
+    runs-on: ubuntu-latest # The runner is still Ubuntu, but it will execute steps inside a container.
+
+    container:
+      image: rockylinux:9 # This is the crucial part. All steps below will run here.
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup and Build
+      run: |
+        # Use dnf to install Python 3.11 and its venv module
+        dnf install -y python3.11 python3.11-pip python3.11-devel
+        
+        # Create and activate a virtual environment
+        python3.11 -m venv .venv
+        source .venv/bin/activate
+        
+        # Now install all Python dependencies into the venv
+        pip install --upgrade pip
+        pip install pyinstaller blessed
+        
+        # Build with PyInstaller in the same shell
+        pyinstaller --onefile src/main.py
+      shell: bash
+
+    # The rest of your steps remain the same
+    - id: prepare_artifact
+      run: |
+        ARTIFACT_NAME=lrm
+        EXECUTABLE_NAME=$(basename "main")
+        FOUND_EXECUTABLE=$(find dist -maxdepth 1 -name "${EXECUTABLE_NAME}*" -print -quit)
+        if [ -z "$FOUND_EXECUTABLE" ]; then
+          echo "Error: Executable not found in 'dist' folder. Check your PyInstaller command and 'main.py' path."
+          exit 1
+        fi
+        mv "${FOUND_EXECUTABLE}" "${ARTIFACT_NAME}"
+        
+        echo "artifact_path=${{ github.workspace }}/${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+        echo "asset_name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ${{ steps.prepare_artifact.outputs.artifact_path }}
+        asset_name: ${{ steps.prepare_artifact.outputs.asset_name }}
+        asset_content_type: application/octet-stream
