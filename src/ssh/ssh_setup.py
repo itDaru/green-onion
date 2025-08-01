@@ -4,20 +4,19 @@ import datetime
 
 def _get_ssh_service_name():
     """Determines the correct SSH service name (ssh.service or sshd.service)."""
-    try:
-        # Check for ssh.service
-        result = subprocess.run(["systemctl", "list-unit-files", "--type=service"], capture_output=True, text=True, check=True)
-        if "ssh.service" in result.stdout:
-            return "ssh"
-        # Check for sshd.service
-        elif "sshd.service" in result.stdout:
-            return "sshd"
-        else:
+    service_names = ["sshd", "ssh"]
+    for name in service_names:
+        try:
+            # Check if the service exists and is manageable by systemctl
+            subprocess.run(["systemctl", "status", f"{name}.service"], check=True, capture_output=True)
+            return name
+        except subprocess.CalledProcessError:
+            # Service not found or not active, try next
+            continue
+        except FileNotFoundError:
+            # systemctl command not found, return None
             return None
-    except subprocess.CalledProcessError:
-        return None
-    except FileNotFoundError:
-        return None
+    return None # No SSH service found
 
 
 
