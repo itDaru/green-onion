@@ -2,6 +2,74 @@ import subprocess
 import os
 import time
 
+def iscsi_connect():
+    target_ip = input("Enter the iSCSI target IP address: ").strip()
+    if not target_ip:
+        print("IP address cannot be empty.")
+        return
+
+    try:
+        # Discover targets
+        print(f"Discovering targets on {target_ip}...")
+        discover_cmd = ["iscsiadm", "-m", "discovery", "-t", "sendtargets", "-p", target_ip]
+        discover_result = subprocess.run(discover_cmd, capture_output=True, text=True, check=True)
+        
+        discovered_targets = []
+        for line in discover_result.stdout.splitlines():
+            parts = line.split()
+            if len(parts) > 1:
+                discovered_targets.append(parts[1])
+
+        if not discovered_targets:
+            print("No iSCSI targets found on the specified IP.")
+            return
+
+        # Check for active sessions
+        sessions_cmd = ["iscsiadm", "-m", "session"]
+        sessions_result = subprocess.run(sessions_cmd, capture_output=True, text=True)
+        active_iqns = []
+        for line in sessions_result.stdout.splitlines():
+            if "tcp:" in line:
+                active_iqns.append(line.split()[2])
+
+        print("\nDiscovered iSCSI Targets:")
+        for i, iqn in enumerate(discovered_targets):
+            status = "(logged in)" if iqn in active_iqns else ""
+            print(f"{i+1}. {iqn} {status}")
+
+        # Select target
+        while True:
+            try:
+                choice = int(input("\nSelect a target to manage: ")) - 1
+                if 0 <= choice < len(discovered_targets):
+                    selected_iqn = discovered_targets[choice]
+                    break
+                else:
+                    print("Invalid choice.")
+            except ValueError:
+                print("Invalid input.")
+
+        # Login or Logout
+        if selected_iqn in active_iqns:
+            confirm = input(f"Target {selected_iqn} is already logged in. Do you want to log out? (yes/no): ").lower()
+            if confirm == 'yes':
+                logout_cmd = ["iscsiadm", "-m", "node", "-T", selected_iqn, "--logout"]
+                subprocess.run(logout_cmd, check=True)
+                print(f"Successfully logged out from {selected_iqn}")
+        else:
+            confirm = input(f"Do you want to log in to {selected_iqn}? (yes/no): ").lower()
+            if confirm == 'yes':
+                login_cmd = ["iscsiadm", "-m", "node", "-T", selected_iqn, "--login"]
+                subprocess.run(login_cmd, check=True)
+                print(f"Successfully logged in to {selected_iqn}")
+
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred: {e.stderr}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+    input("Press Enter to continue...")
+
 def is_iscsi_device(device):    # iSCSI Disk Check
     try:
         transport = subprocess.check_output(

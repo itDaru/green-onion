@@ -1,5 +1,5 @@
 from core import clear_screen, display_menu, get_choice
-from iscsi import iscsi_setup
+from iscsi import iscsi_setup, iscsi_auth
 
 def configure_iscsi():
     iscsi_options = [
@@ -17,7 +17,7 @@ def configure_iscsi():
         if choice == 0:
             break
         elif choice == 1:
-            iscsi_setup.configure_iscsi_connection()
+            iscsi_setup.iscsi_connect()
         elif choice == 2:
             setup_chap_authentication()
         elif choice == 3:
