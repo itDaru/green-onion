@@ -20,6 +20,7 @@ __pycache__/
 
 # VS Code
 .vscode/
+ANALYSIS.md
 
 # OS generated files #
 .DS_Store
