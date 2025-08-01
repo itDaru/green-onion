@@ -11,7 +11,7 @@ Intended for usage with Veeam.
 *   **iSCSI Management** 🎯: Discover and connect to iSCSI targets, manage sessions, and configure CHAP authentication for secure storage connections.
 *   **Local Storage Management** 💾: List, format, and mount local disks.
 *   **User Management** 👤: Create and manage system users.
-    *   Create standard users with interactive password setup and optional SSH key/sudo access.
+    *   Create standard users with a secure random password and optional SSH key/sudo access.
     *   Set up a dedicated `veeamsvc` user with a secure, randomly generated password.
     *   Provision a passwordless `ansible` user for automation, secured with an SSH key and non-interactive shell.
     *   Disable or completely remove users from the system.

@@ -83,8 +83,12 @@ def setup_user():
             print("\nWARNING: SAVE THIS PASSWORD IN A SECURE PLACE! \n\nIT WILL NOT BE DISPLAYED AGAIN!\n")
 
             print(f"Setting password for user '{username}'...")
-            subprocess.run(["passwd", username], check=True)
-            print(f"Password set for user '{username}'.")
+            subprocess.run(
+                ["chpasswd"],
+                input=f"{username}:{password}".encode('utf-8'),
+                check=True,
+                capture_output=True
+            )
 
             sudo_choice = input(f"Do you want to add user '{username}' to sudoers? (yes/no) [no]: ").strip().lower()
             if sudo_choice in ['yes', 'y']:
