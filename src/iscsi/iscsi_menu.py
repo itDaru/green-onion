@@ -19,7 +19,7 @@ def configure_iscsi():
         elif choice == 1:
             iscsi_setup.iscsi_connect()
         elif choice == 2:
-            setup_chap_authentication()
+            iscsi_auth.setup_chap_authentication()
         elif choice == 3:
             iscsi_setup.list_iscsi_disks()
         elif choice == 4:

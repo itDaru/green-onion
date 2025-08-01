@@ -30,7 +30,12 @@ def iscsi_connect():
         active_iqns = []
         for line in sessions_result.stdout.splitlines():
             if "tcp:" in line:
-                active_iqns.append(line.split()[2])
+                # Attempt to find the IQN by looking for "iqn." in the line parts
+                parts = line.split()
+                for part in parts:
+                    if part.startswith("iqn."):
+                        active_iqns.append(part)
+                        break
 
         print("\nDiscovered iSCSI Targets:")
         for i, iqn in enumerate(discovered_targets):
@@ -51,7 +56,7 @@ def iscsi_connect():
 
         # Login or Logout
         if selected_iqn in active_iqns:
-            confirm = input(f"Target {selected_iqn} is already logged in. Do you want to log out? (yes/no): ").lower()
+            confirm = input(f"Target {selected_iqn} is already logged in. Do you want to log out? (yes/No): ").lower()
             if confirm == 'yes':
                 logout_cmd = ["iscsiadm", "-m", "node", "-T", selected_iqn, "--logout"]
                 subprocess.run(logout_cmd, check=True)
