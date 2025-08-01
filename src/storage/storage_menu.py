@@ -8,6 +8,7 @@ def storage_menu():
         "List Disks",
         "Mount Disk",
         "Format Disk",
+        "Partition Disk",
         "Setup RAID",
         "Setup LVM"
     ]
@@ -26,8 +27,10 @@ def storage_menu():
         elif choice == 3:
             storage_setup.format_disk()
         elif choice == 4:
-            storage_setup.setup_raid()
+            storage_setup.partition_disk()
         elif choice == 5:
+            storage_setup.setup_raid()
+        elif choice == 6:
             storage_setup.setup_lvm()
         else:
             print("Invalid choice. Try again.\n")

@@ -215,6 +215,127 @@ def format_disk():
         print(f"An unexpected error occurred: {e}")
 
 
+def partition_disk():
+    print("\n--- Partition Disk ---")
+    try:
+        # 1. List all disks (not partitions)
+        lsblk_output = subprocess.run(
+            ["lsblk", "-P", "-o", "NAME,SIZE,TYPE"],
+            capture_output=True, text=True, check=True
+        ).stdout
+
+        available_disks = []
+        print("\nAvailable disks for partitioning:")
+        for line in lsblk_output.strip().splitlines():
+            device_info = {k: v.strip('"') for k, v in (pair.split('=', 1) for pair in shlex.split(line))}
+            if device_info.get("TYPE") == "disk":
+                available_disks.append(device_info)
+                print(f"{len(available_disks)}. /dev/{device_info.get('NAME')} ({device_info.get('SIZE')})")
+
+        if not available_disks:
+            print("No disks found for partitioning.")
+            input("Press Enter to continue...")
+            return
+
+        # Let the user select a disk
+        while True:
+            try:
+                choice = int(input("Select the disk to partition: ")) - 1
+                if 0 <= choice < len(available_disks):
+                    selected_disk_info = available_disks[choice]
+                    break
+                else:
+                    print("Invalid choice.")
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+
+        disk_path = f"/dev/{selected_disk_info.get('NAME')}"
+
+        # 2. Check if the device already has partitions
+        parted_output = subprocess.run(
+            ["parted", "-s", disk_path, "print"],
+            capture_output=True, text=True, check=False # check=False because parted returns non-zero if no partitions
+        ).stdout
+
+        existing_partitions = []
+        for line in parted_output.splitlines():
+            if line.strip().startswith(tuple(str(i) for i in range(1, 10))): # Check for lines starting with a digit (partition number)
+                existing_partitions.append(line)
+        
+        if existing_partitions:
+            print(f"\nWARNING: The disk {disk_path} already has existing partitions:")
+            for part in existing_partitions:
+                print(f"  {part}")
+            confirm_continue = input("Continuing will modify the partition table. Are you sure you want to proceed? (yes/no): ").lower().strip()
+            if confirm_continue != 'yes':
+                print("Partitioning cancelled.")
+                input("Press Enter to continue...")
+                return
+
+        # 3. Inform the user which partition will be created
+        # Get the last partition number and increment it
+        last_partition_num = 0
+        for line in existing_partitions:
+            try:
+                num = int(line.strip().split()[0])
+                if num > last_partition_num:
+                    last_partition_num = num
+            except ValueError:
+                pass # Ignore lines that don't start with a number
+
+        new_partition_number = last_partition_num + 1
+        new_partition_name = f"{disk_path}{new_partition_number}"
+        print(f"A new partition will be created as {new_partition_name}.")
+
+        # 4. Ask the user for the size of the partition
+        while True:
+            size_input = input("Enter the size of the new partition (e.g., 10G, 500M, or 'ALL' for remaining space): ").strip().upper()
+            if size_input == "ALL":
+                start_sector = "0%" # parted uses 0% for start of free space
+                end_sector = "100%" # parted uses 100% for end of free space
+                break
+            elif size_input and (size_input.endswith('G') or size_input.endswith('M') or size_input.endswith('T')):
+                # Basic validation for size format
+                try:
+                    float(size_input[:-1]) # Check if the number part is valid
+                    start_sector = "0%" # For a specific size, we'll assume starting from the beginning of free space
+                    end_sector = f"0%+{size_input}" # parted syntax for size
+                    break
+                except ValueError:
+                    print("Invalid size format. Please use G, M, or T suffix (e.g., 10G) or 'ALL'.")
+            else:
+                print("Invalid size format. Please use G, M, or T suffix (e.g., 10G) or 'ALL'.")
+
+        # 5. Proceed with the creation of the partition
+        print(f"Creating partition on {disk_path}...")
+        try:
+            # Ensure a GPT label exists if not already present
+            if "Partition Table: gpt" not in parted_output:
+                print(f"Creating GPT partition table on {disk_path}...")
+                subprocess.run(["parted", "-s", disk_path, "mklabel", "gpt"], check=True)
+                
+            # Create the partition
+            create_partition_cmd = ["parted", "-s", disk_path, "mkpart", "primary", start_sector, end_sector]
+            subprocess.run(create_partition_cmd, check=True)
+            print(f"Partition {new_partition_name} created successfully.")
+            subprocess.run(["partprobe"], check=True, capture_output=True) # Inform OS about new partition
+            time.sleep(2) # Give OS time to recognize new partition
+            print("New partition table:")
+            subprocess.run(["lsblk", disk_path], check=True)
+
+        except subprocess.CalledProcessError as e:
+            print(f"Error creating partition: {e.stderr}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+    input("Press Enter to continue...")
+
+
 def setup_raid():
     """Sets up a software RAID array."""
     print("Setup RAID functionality is coming soon!")
