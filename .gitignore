@@ -1,3 +1,6 @@
+# GitHub things:
+*.github
+
 # Virtual Environment
 venv/
 .venv/
