@@ -2,11 +2,34 @@ import subprocess
 import shutil
 import datetime
 
+def _get_ssh_service_name():
+    """Determines the correct SSH service name (ssh.service or sshd.service)."""
+    try:
+        # Check for ssh.service
+        result = subprocess.run(["systemctl", "list-unit-files", "--type=service"], capture_output=True, text=True, check=True)
+        if "ssh.service" in result.stdout:
+            return "ssh"
+        # Check for sshd.service
+        elif "sshd.service" in result.stdout:
+            return "sshd"
+        else:
+            return None
+    except subprocess.CalledProcessError:
+        return None
+    except FileNotFoundError:
+        return None
+
+
+
 
 def _get_ssh_status():
     """Checks if the ssh service is active."""
+    ssh_service_name = _get_ssh_service_name()
+    if not ssh_service_name:
+        return "unknown" # Could not determine service name
+
     try:
-        result = subprocess.run(["systemctl", "is-active", "ssh"], capture_output=True, text=True)
+        result = subprocess.run(["systemctl", "is-active", f"{ssh_service_name}.service"], capture_output=True, text=True)
         if result.returncode == 0:
             return "active"
         else:
@@ -36,13 +59,18 @@ def toggle_ssh_service():
     if (action == "disable" and choice in ['y', 'yes']) or \
        (action == "enable" and choice in ['y', 'yes', '']):
         try:
+            ssh_service_name = _get_ssh_service_name()
+            if not ssh_service_name:
+                print("Could not determine SSH service name. Cannot toggle service.")
+                return
+
             if action == "enable":
                 print("Enabling and starting SSH service...")
-                subprocess.run(["systemctl", "enable", "--now", "ssh"], check=True, capture_output=True)
+                subprocess.run(["systemctl", "enable", "--now", f"{ssh_service_name}.service"], check=True, capture_output=True)
                 print("SSH service enabled and started successfully.")
             else:
                 print("Disabling and stopping SSH service...")
-                subprocess.run(["systemctl", "disable", "--now", "ssh"], check=True, capture_output=True)
+                subprocess.run(["systemctl", "disable", "--now", f"{ssh_service_name}.service"], check=True, capture_output=True)
                 print("SSH service stopped and disabled successfully.")
         except subprocess.CalledProcessError as e:
             print(f"Error executing systemctl command: {e.stderr}")
@@ -101,7 +129,11 @@ def harden_ssh():
         restart_choice = input("\nDo you want to restart the SSH service to apply changes now? (yes/no) [yes]: ").strip().lower()
         if restart_choice in ['', 'y', 'yes']:
             print("Restarting SSH service...")
-            subprocess.run(["systemctl", "restart", "ssh"], check=True, capture_output=True)
+            ssh_service_name = _get_ssh_service_name()
+            if not ssh_service_name:
+                print("Could not determine SSH service name. Cannot restart service.")
+                return
+            subprocess.run(["systemctl", "restart", f"{ssh_service_name}.service"], check=True, capture_output=True)
             print("SSH service restarted.")
         else:
             print("Please restart the SSH service manually ('sudo systemctl restart ssh') to apply changes.")
