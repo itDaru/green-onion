@@ -6,14 +6,12 @@ import datetime
 def _get_ssh_status():
     """Checks if the ssh service is active."""
     try:
-        # A non-zero exit code is expected for 'inactive', so we don't check=True
         result = subprocess.run(["systemctl", "is-active", "ssh"], capture_output=True, text=True)
         if result.returncode == 0:
             return "active"
         else:
             return "inactive"
     except FileNotFoundError:
-        # systemctl not found
         return "unknown"
 
 def toggle_ssh_service():
@@ -29,7 +27,7 @@ def toggle_ssh_service():
     if status == "active":
         prompt = "Do you want to disable and stop the SSH service? (yes/no) [no]: "
         action = "disable"
-    else:  # inactive
+    else:
         prompt = "Do you want to enable and start the SSH service? (yes/no) [yes]: "
         action = "enable"
 
@@ -42,7 +40,7 @@ def toggle_ssh_service():
                 print("Enabling and starting SSH service...")
                 subprocess.run(["systemctl", "enable", "--now", "ssh"], check=True, capture_output=True)
                 print("SSH service enabled and started successfully.")
-            else:  # disable
+            else:
                 print("Disabling and stopping SSH service...")
                 subprocess.run(["systemctl", "disable", "--now", "ssh"], check=True, capture_output=True)
                 print("SSH service stopped and disabled successfully.")

@@ -5,7 +5,6 @@ import tempfile
 
 from users.users_setup import _write_ssh_key
 
-
 def generate_ssh_keypair():
     """Generates an SSH keypair and offers to add the public key to user accounts."""
     print("Select an SSH key algorithm:")
@@ -32,7 +31,6 @@ def generate_ssh_keypair():
     comment = input("Enter a comment for the key (e.g., your_email@example.com, press Enter to skip): ").strip()
 
     try:
-        # Use a temporary directory for safe key generation and automatic cleanup.
         with tempfile.TemporaryDirectory() as tmpdir:
             private_key_path = os.path.join(tmpdir, "temp_ssh_key")
             public_key_path = f"{private_key_path}.pub"
@@ -46,10 +44,8 @@ def generate_ssh_keypair():
             if comment:
                 print(f"Comment: '{comment}'")
 
-            # Generate the key pair into the temporary files
             subprocess.run(command_parts, check=True, capture_output=True)
 
-            # Read the keys from the temporary files
             with open(private_key_path, 'r') as f:
                 private_key = f.read().strip()
             with open(public_key_path, 'r') as f:
@@ -66,9 +62,7 @@ def generate_ssh_keypair():
             print(public_key)
             print("=" * 70)
 
-            # Offer to write public key to user's authorized_keys
             print("\n--- Add Public Key to User(s) ---")
-            # Filter out system users and users with nologin shells
             users = [p.pw_name for p in pwd.getpwall() if p.pw_uid >= 1000 and 'nologin' not in p.pw_shell]
             if not users:
                 print("No suitable users found to add the public key to.")
@@ -93,7 +87,6 @@ def generate_ssh_keypair():
 
                     except ValueError:
                         print("Invalid input. Please enter numbers separated by commas.")
-            # The temporary directory and its contents are automatically removed here.
 
     except subprocess.CalledProcessError as e:
         print(f"\nError generating SSH key. ssh-keygen exited with an error:")

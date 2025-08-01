@@ -9,7 +9,6 @@ def iscsi_connect():
         return
 
     try:
-        # Discover targets
         print(f"Discovering targets on {target_ip}...")
         discover_cmd = ["iscsiadm", "-m", "discovery", "-t", "sendtargets", "-p", target_ip]
         discover_result = subprocess.run(discover_cmd, capture_output=True, text=True, check=True)
@@ -24,13 +23,11 @@ def iscsi_connect():
             print("No iSCSI targets found on the specified IP.")
             return
 
-        # Check for active sessions
         sessions_cmd = ["iscsiadm", "-m", "session"]
         sessions_result = subprocess.run(sessions_cmd, capture_output=True, text=True)
         active_iqns = []
         for line in sessions_result.stdout.splitlines():
             if "tcp:" in line:
-                # Attempt to find the IQN by looking for "iqn." in the line parts
                 parts = line.split()
                 for part in parts:
                     if part.startswith("iqn."):
@@ -42,7 +39,6 @@ def iscsi_connect():
             status = "(logged in)" if iqn in active_iqns else ""
             print(f"{i+1}. {iqn} {status}")
 
-        # Select target
         while True:
             try:
                 choice = int(input("\nSelect a target to manage: ")) - 1
@@ -54,7 +50,6 @@ def iscsi_connect():
             except ValueError:
                 print("Invalid input.")
 
-        # Login or Logout
         if selected_iqn in active_iqns:
             confirm = input(f"Target {selected_iqn} is already logged in. Do you want to log out? (yes/No): ").lower()
             if confirm == 'yes':
@@ -75,7 +70,7 @@ def iscsi_connect():
 
     input("Press Enter to continue...")
 
-def is_iscsi_device(device):    # iSCSI Disk Check
+def is_iscsi_device(device):
     try:
         transport = subprocess.check_output(
             ["udevadm", "info", "--query=property", "--name=" + device],
@@ -87,7 +82,7 @@ def is_iscsi_device(device):    # iSCSI Disk Check
     except subprocess.CalledProcessError:
         return False
 
-def list_iscsi_disks():         # iSCSI Disk List
+def list_iscsi_disks():
     try:
         sessions_command = ["iscsiadm", "-m", "session"]
         sessions_result = subprocess.run(sessions_command, capture_output=True, text=True, check=True)
@@ -121,7 +116,7 @@ def list_iscsi_disks():         # iSCSI Disk List
 
     input("Press Enter to continue...")
 
-def format_iscsi_disk():        # iSCSI Disk Format
+def format_iscsi_disk():
     try:
         lsblk_command = ["lsblk", "-n", "-o", "NAME,SIZE,TYPE,TRAN"]
         lsblk_result = subprocess.run(lsblk_command, capture_output=True, text=True, check=True)
