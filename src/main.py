@@ -1,9 +1,9 @@
 import core
-from network import network_menu
-from iscsi import iscsi_menu
-from users import users_menu
-from ssh import ssh_menu
-from storage import storage_menu
+import network.network_menu
+import iscsi.iscsi_menu
+import users.users_menu
+import ssh.ssh_menu
+import storage.storage_menu
 
 def main():
     options = [
